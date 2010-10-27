@@ -23,29 +23,31 @@ comm_channel channel[UNRECLAIMED_TAB_COUNTER];
  *			process.
  */
 
-void uri_entered_cb(GtkWidget* entry, gpointer data)
-{
-	if(!data)
+void uri_entered_cb(GtkWidget* entry, gpointer data) {
+	if (!data)
 		return;
-	browser_window* b_window = (browser_window*)data;
-        comm_channel channel = b_window->channel;
+	browser_window* b_window = (browser_window*) data;
+	comm_channel channel = b_window->channel;
 	// Get the tab index where the URL is to be rendered
 	int tab_index = query_tab_id_for_request(entry, data);
-	if(tab_index <= 0)
-	{
+	if (tab_index <= 0) {
 		//Append code for error handling
+		perror("Error invalid tab index");
 	}
 
 	// Get the URL.
 	char* uri = get_entered_uri(entry);
-
 	// Prepare 'request' packet to send to router (/parent) process.
 	// Append your code here
+	child_req_to_parent req;
+	req.type = NEW_URI_ENTERED;
+	strcpy(req.req.uri_req.uri, uri);
+	req.req.uri_req.render_in_tab = tab_index;
+	int com_pipe = channel.child_to_parent_fd[1];
+	int size = sizeof(req);
+	write(com_pipe, &req, size);
+
 }
-
-
-
-
 
 /*
 
@@ -60,19 +62,25 @@ void uri_entered_cb(GtkWidget* entry, gpointer data)
  *			redirects the request to the parent (/router) process
  *			which then creates a new child process for creating
  *			and managing this new tab.
- */ 
+ */
 void new_tab_created_cb(GtkButton *button, gpointer data)
 
 {
-	if(!data)
+	if (!data)
 		return;
- 	int tab_index = ((browser_window*)data)->tab_index;
-	comm_channel channel = ((browser_window*)data)->channel;
+	int tab_index = ((browser_window*) data)->tab_index;
+	comm_channel channel = ((browser_window*) data)->channel;
 
 	// Create a new request of type CREATE_TAB
 
-        child_req_to_parent new_req;
+	child_req_to_parent new_req;
+	new_req.type = CREATE_TAB;
+	new_req.req.new_tab_req.tab_index = tab_index;
+	// write to router to fork new tab
+	int to_router = channel.child_to_parent_fd[1];
+	int size = sizeof(new_req);
 	//Append your code here
+	write(to_router, &new_req, size);
 
 }
 
@@ -93,14 +101,23 @@ int main()
 		close(ctpf[1]);
 		close(ptcf[0]);
 		browser_window *bw_controller;
-		create_browser(CONTROLLER_TAB,0,(void(*)( void)) &new_tab_created_cb, (void(*)( void))&uri_entered_cb, &bw_controller,channel[0]);
+		create_browser(CONTROLLER_TAB, 0, (void(*)(void)) &new_tab_created_cb,
+				(void(*)(void)) &uri_entered_cb, &bw_controller, channel[0]);
 		show_browser();
 
-	}
-	else {
+	} else {
 		close(ctpf[0]);
 		close(ptcf[1]);
-		while(1);
+
+		int read_from_controller = channel[0].child_to_parent_fd[0];
+		int flags = fcntl(read_from_controller, F_GETFL);
+		flags |= O_NONBLOCK;
+		fcntl(read_from_controller, F_SETFL, flags);
+
+		// TODO Finish this part
+		// TODO then error check
+		while (tabs > 0)
+			;
 	}
 
 	return 0;
