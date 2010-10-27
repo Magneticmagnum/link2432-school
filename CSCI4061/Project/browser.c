@@ -80,19 +80,22 @@ int main()
 
 {
 	// Append your code here
-	int[] ctpf = channel[0].child_to_parent_fd;
-	int[] ptcf = channel[0].parent_to_child_fd;
-	if (pipe(ctpf) == 0) {
+	int * ctpf = channel[0].child_to_parent_fd;
+	int* ptcf = channel[0].parent_to_child_fd;
+	if (pipe(ctpf) != 0) {
 		perror("Error pipe");
 	}
-	if (pipe(ptcf) == 0) {
+	if (pipe(ptcf) != 0) {
 		perror("Error pipe 2");
 	}
 	int controller = fork();
 	if (controller == 0) {
 		close(ctpf[1]);
 		close(ptcf[0]);
+		browser_window *bw_controller;
+		create_browser(CONTROLLER_TAB,0,(void(*)( void)) &new_tab_created_cb, (void(*)( void))&uri_entered_cb, &bw_controller,channel[0]);
 		show_browser();
+
 	}
 	else {
 		close(ctpf[0]);
@@ -102,4 +105,3 @@ int main()
 
 	return 0;
 }
-
