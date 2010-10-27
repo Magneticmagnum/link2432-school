@@ -80,6 +80,25 @@ int main()
 
 {
 	// Append your code here
+	int[] ctpf = channel[0].child_to_parent_fd;
+	int[] ptcf = channel[0].parent_to_child_fd;
+	if (pipe(ctpf) == 0) {
+		perror("Error pipe");
+	}
+	if (pipe(ptcf) == 0) {
+		perror("Error pipe 2");
+	}
+	int controller = fork();
+	if (controller == 0) {
+		close(ctpf[1]);
+		close(ptcf[0]);
+		show_browser();
+	}
+	else {
+		close(ctpf[0]);
+		close(ptcf[1]);
+		while(1);
+	}
 
 	return 0;
 }
