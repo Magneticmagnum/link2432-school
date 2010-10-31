@@ -108,15 +108,28 @@ void close_pipe_ends_child(int index) {
 	close(ptcf[1]);
 }
 
-int main()
+void set_unblock_read(int read_fd) {
+	int flags;
 
+	flags = fcntl(read_fd, F_GETFL);
+	flags |= O_NONBLOCK;
+	fcntl(read_fd, F_SETFL, flags);
+}
+
+//TODO refactor code in the main loop to functions
+//TODO implement more error handling
+//TODO add comments
+int main()
 {
+
 	int router_pid = getpid();
+	printf("Parent PID = %d\n", router_pid);
 	// create pipes and fork for controller
 	create_pipes(0);
 	int controller = fork();
 	if (controller == 0) {
 		// controller process, create window
+		printf("Controller PID = %d\n", getpid());
 		close_pipe_ends_child(0);
 		browser_window *bw_controller;
 		create_browser(CONTROLLER_TAB, 0, G_CALLBACK(new_tab_created_cb),
@@ -126,65 +139,102 @@ int main()
 		// router process
 		close_pipe_ends_parent(0);
 		int comm_index = 0;
-		int read_fd;
-		int flags;
-		int index = 1;
+		int pipe_status[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		int read_controller_fd = channel[0].child_to_parent_fd[0];
+		int read_router_fd;
 		int tabs = 1;
 		browser_window *bw_tab;
-
+		set_unblock_read(read_controller_fd);
 		// Loop while tabs are opened
 		while (tabs > 0) {
-			//TODO fix reading from pipes
 			child_req_to_parent request;
-			read_fd = channel[comm_index].child_to_parent_fd[0];
-			if ((flags = fcntl(read_fd, F_GETFL)) == -1) {
-				comm_index++;
-				comm_index = comm_index % 10;
-				usleep(1);
-				continue;
+			usleep(1);
+			if (getpid() == router_pid) {
+				if (pipe_status[comm_index] == 1) {
+					int read_fd = channel[comm_index].child_to_parent_fd[0];
+					if (read(read_fd, &request, sizeof(request)) == -1 && errno
+							== EAGAIN) {
+						comm_index++;
+						comm_index = comm_index % 10;
+						continue;
+					}
+				} else {
+					comm_index++;
+					comm_index = comm_index % 10;
+					continue;
+				}
 
-			}
-			flags |= O_NONBLOCK;
-			fcntl(read_fd, F_SETFL, flags);
-
-			if (read(read_fd, &request, sizeof(request)) == -1 && errno
-					== EAGAIN) {
-				comm_index++;
-				comm_index = comm_index % 10;
-				usleep(1);
-				continue;
+				printf("got request\n");
+			} else {
+				if (read(read_router_fd, &request, sizeof(request)) == -1
+						&& errno == EAGAIN) {
+					process_single_gtk_event();
+					continue;
+				}
+				printf("read pipe\n");
 			}
 			req_type rt = request.type;
+
 			// check request type
 			if (rt == CREATE_TAB) {
 				// create pipes and fork a tab process
-				create_pipes(index);
+				int i, unused_tab = 0;
+				for (i = 1; i < 10; i++) {
+					if (pipe_status[i] == 0) {
+						unused_tab = i;
+						break;
+					}
+				}
+				if (unused_tab > 0) {
+					create_pipes(unused_tab);
+				} else {
+					char error_message[] = "No more free tabs.  Please close a tab to open a new one.";
+					perror(error_message);
+					//TODO: get popup alert to work
+					//alert(error_message);
+					continue;
+				}
+
 				int pid = fork();
 				printf("PID = %d and parent %d\n", getpid(), getppid());
 				if (pid == 0) {
 					// tab process, create tab window
-					//TODO tab does not open sometimes
-					close_pipe_ends_child(index);
-					create_browser(URL_RENDERING_TAB, index, G_CALLBACK(
+					close_pipe_ends_child(unused_tab);
+					read_router_fd = channel[unused_tab].parent_to_child_fd[0];
+					set_unblock_read(read_router_fd);
+					create_browser(URL_RENDERING_TAB, unused_tab, G_CALLBACK(
 							new_tab_created_cb), G_CALLBACK(uri_entered_cb),
-							&bw_tab, channel[index]);
+							&bw_tab, channel[unused_tab]);
+
 				} else {
 					// router process, increment counters
-					close_pipe_ends_parent(index);
-					index++;
+
+					close_pipe_ends_parent(unused_tab);
+					pipe_status[unused_tab] = 1;
+					read_router_fd = channel[unused_tab].child_to_parent_fd[0];
+					set_unblock_read(read_router_fd);
 					tabs++;
 				}
 
 			}
 			if (rt == NEW_URI_ENTERED) {
 				if (getpid() == router_pid) {
-					// router process, send uri request to tab process
-					write(
-							channel[request.req.uri_req.render_in_tab].parent_to_child_fd[1],
-							&request, sizeof(request));
+					int tab_index = request.req.uri_req.render_in_tab;
+					if (pipe_status[tab_index] == 0) {
+						char error_message[] = "That tab is not opened.";
+						perror(error_message);
+						//TODO: get popup alert to work
+						//alert(error_message);
+						continue;
+
+					} else {
+						// router process, send uri request to tab process
+						write(channel[tab_index].parent_to_child_fd[1],
+								&request, sizeof(request));
+					}
 				} else {
 					// tab process, render page in window
-					//TODO NEW_URI_ENTERED sometimes works, somtimes does not
+					printf("%s\n", request.req.uri_req.uri);
 					render_web_page_in_tab(request.req.uri_req.uri, bw_tab);
 					printf("Render page:PID = %d and parent %d\n", getpid(),
 							getppid());
@@ -192,41 +242,33 @@ int main()
 
 			}
 			if (rt == TAB_KILLED) {
-				process_all_gtk_events();
 				// index of tab kill signal
+				printf("mooo\n");
 				int tab_index = request.req.killed_req.tab_index;
 				if (getpid() == router_pid) {
-					//TODO fix killing of all tabs when controller is closed
-					// router process, if controller sent the signal
-					if (tab_index == 0) {
-						int i;
-						// send message to all tabs to end
-						for (i = 0; i < 10; i++) {
-							close_pipe_ends_child(i);
-							write(channel[tab_index].parent_to_child_fd[1],
-									&request, sizeof(request));
-						}
-					} else {
-						// if a tab sent the signal, close pipes to the tab
-						close_pipe_ends_child(tab_index);
-						// send kill signal to tab
-						write(channel[tab_index].parent_to_child_fd[1],
-								&request, sizeof(request));
-					}
+					write(channel[tab_index].parent_to_child_fd[1], &request,
+							sizeof(request));
+					close_pipe_ends_child(tab_index);
+					pipe_status[tab_index] = 0;
+					// send kill signal to tab
+
+					//					}
+					tabs--;
 				} else {
-					//TODO tab window does not close sometimes
 					// tab process, close pipes
 					close_pipe_ends_parent(tab_index);
-					tabs = tabs - 100;
-					printf("Exit:PID = %d and parent %d\n", getpid(), getppid());
+					process_all_gtk_events();
+					printf("Exiting:PID = %d and tab # = %d\n", getpid(),
+							tab_index);
+					break;
 				}
 
 			}
-			if (getpid() != router_pid) {
-				process_single_gtk_event();
-			}
+
 		}
 	}
+
+	printf("PID %d Exited\n", getpid());
 
 	return 0;
 }
