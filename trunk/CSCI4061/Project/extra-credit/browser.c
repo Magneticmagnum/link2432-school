@@ -26,16 +26,14 @@ comm_channel channel[UNRECLAIMED_TAB_COUNTER];
  *			process.
  */
 
-void uri_entered_cb(GtkWidget* entry, gpointer data)
-{
-	if(!data)
+void uri_entered_cb(GtkWidget* entry, gpointer data) {
+	if (!data)
 		return;
-	browser_window* b_window = (browser_window*)data;
-        comm_channel channel = b_window->channel;
+	browser_window* b_window = (browser_window*) data;
+	comm_channel channel = b_window->channel;
 	// Get the tab index where the URL is to be rendered
 	int tab_index = query_tab_id_for_request(entry, data);
-	if(tab_index <= 0)
-	{
+	if (tab_index <= 0) {
 		//Append code for error handling
 	}
 
@@ -45,10 +43,6 @@ void uri_entered_cb(GtkWidget* entry, gpointer data)
 	// Prepare 'request' packet to send to router (/parent) process.
 	// Append your code here
 }
-
-
-
-
 
 /*
 
@@ -63,18 +57,18 @@ void uri_entered_cb(GtkWidget* entry, gpointer data)
  *			redirects the request to the parent (/router) process
  *			which then creates a new child process for creating
  *			and managing this new tab.
- */ 
+ */
 void new_tab_created_cb(GtkButton *button, gpointer data)
 
 {
-	if(!data)
+	if (!data)
 		return;
- 	int tab_index = ((browser_window*)data)->tab_index;
-	comm_channel channel = ((browser_window*)data)->channel;
+	int tab_index = ((browser_window*) data)->tab_index;
+	comm_channel channel = ((browser_window*) data)->channel;
 
 	// Create a new request of type CREATE_TAB
 
-        child_req_to_parent new_req;
+	child_req_to_parent new_req;
 	//Append your code here
 
 }
@@ -90,19 +84,40 @@ void new_tab_created_cb(GtkButton *button, gpointer data)
  *                      into the list.
  */
 
-void bookmark_curr_page_cb(void *data)
-{
-        browser_window* b_window = (browser_window*)data;
+void bookmark_curr_page_cb(void *data) {
+	browser_window* b_window = (browser_window*) data;
 
-        //get the current web-page to bookmark
-        const char* curr_webpage = get_current_uri(b_window);
-
-	//Append your code here
+	//get the current web-page to bookmark
+	const char* curr_webpage = get_current_uri(b_window);
+	bookmarks* ptr = (bookmarks*) shmat(shared_bookmarks, NULL, 0);
+	if (ptr == (void*) -1) {
+		perror("Unable to attach bookmark array");
+	} else {
+		int num_marks = ptr[0].bookmarks_count;
+		if (num_marks < MAX_BOOKMARKS) {
+			bookmarks* current = ptr[num_marks];
+			strncpy(current.uri, curr_webpage, 256);
+			ptr[0].bookmarks_count++;
+		} else {
+			gchar err[] = "Too many bookmarks!";
+			alert(err);
+		}
+	}
+	shmdt(ptr);
+}
+void assign_bookmark_id() {
+	int shared_bookmarks = shmget(SHM_KEY, MAX_BOOKMARKS * sizeof(bookmarks),
+			IPC_CREAT | 0777);
 }
 int main()
 
 {
+	assign_bookmark_id();
+	bookmarks* bm = shmat(shared_bookmarks, NULL, 0);
+	bm[0].bookmarks_count = 0;
+	shmdt(bm);
 	// Append your code here
+	// then fork
 
 	return 0;
 }
