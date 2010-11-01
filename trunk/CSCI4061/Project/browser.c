@@ -119,8 +119,7 @@ void set_unblock_read(int read_fd) {
 //TODO refactor code in the main loop to functions
 //TODO implement more error handling
 //TODO add comments
-int main()
-{
+int main() {
 
 	int router_pid = getpid();
 	printf("Parent PID = %d\n", router_pid);
@@ -148,7 +147,7 @@ int main()
 		// Loop while tabs are opened
 		while (tabs > 0) {
 			child_req_to_parent request;
-			usleep(1);
+			usleep(10);
 			if (getpid() == router_pid) {
 				if (pipe_status[comm_index] == 1) {
 					int read_fd = channel[comm_index].child_to_parent_fd[0];
@@ -188,7 +187,8 @@ int main()
 				if (unused_tab > 0) {
 					create_pipes(unused_tab);
 				} else {
-					char error_message[] = "No more free tabs.  Please close a tab to open a new one.";
+					char error_message[] =
+							"No more free tabs.  Please close a tab to open a new one.";
 					perror(error_message);
 					//TODO: get popup alert to work
 					//alert(error_message);
@@ -221,10 +221,10 @@ int main()
 				if (getpid() == router_pid) {
 					int tab_index = request.req.uri_req.render_in_tab;
 					if (pipe_status[tab_index] == 0) {
-						char error_message[] = "That tab is not opened.";
+						gchar error_message[] = "That tab is not opened.";
 						perror(error_message);
 						//TODO: get popup alert to work
-						//alert(error_message);
+						alert(error_message);
 						continue;
 
 					} else {
