@@ -32,7 +32,7 @@ void uri_entered_cb(GtkWidget* entry, gpointer data) {
 	int tab_index = query_tab_id_for_request(entry, data);
 	if (tab_index <= 0) {
 		//Append code for error handling
-		perror("Error invalid tab index");
+		perror("Error invalid tab index.");
 	}
 
 	// Get the URL.
@@ -80,32 +80,58 @@ void new_tab_created_cb(GtkButton *button, gpointer data)
 	int to_router = channel.child_to_parent_fd[1];
 	int size = sizeof(new_req);
 	//Append your code here
-	write(to_router, &new_req, size);
-
-}
-void create_pipes(int index) {
-	int * ctpf = channel[index].child_to_parent_fd;
-	int * ptcf = channel[index].parent_to_child_fd;
-	if (pipe(ctpf) != 0) {
-		perror("Error pipe");
+	if (write(to_router, &new_req, size) == -1) {
+		perror("Error writing new tab data!");
 	}
-	if (pipe(ptcf) != 0) {
-		perror("Error pipe 2");
+
+}
+// Create two pipes at the channel index.  If pipe fails, return the error
+int create_pipes(int index) {
+	int * ctpf = channel[index].child_to_parent_fd;
+	int * ptcf = channel[index].parent_to_child_fd;
+	int p1 = pipe(ctpf);
+	int p2 = pipe(ptcf);
+	if (p1 != 0) {
+		perror("Error opening pipe 1");
+		return p1;
 	}
+	if (p2 != 0) {
+		perror("Error opening pipe 1");
+		return p2;
+	}
+	return 0;
 }
 
-void close_pipe_ends_parent(int index) {
+int close_pipe_ends_parent(int index) {
 	int * ctpf = channel[index].child_to_parent_fd;
 	int * ptcf = channel[index].parent_to_child_fd;
-	close(ctpf[1]);
-	close(ptcf[0]);
+	int c1 = close(ctpf[1]);
+	int c2 = close(ptcf[0]);
+	if (c1 != 0) {
+		perror("Error closing pipe 1");
+		return c1;
+	}
+	if (c2 != 0) {
+		perror("Error closing pipe 2");
+		return c2;
+	}
+	return 0;
 }
 
-void close_pipe_ends_child(int index) {
+int close_pipe_ends_child(int index) {
 	int * ctpf = channel[index].child_to_parent_fd;
 	int * ptcf = channel[index].parent_to_child_fd;
-	close(ctpf[0]);
-	close(ptcf[1]);
+	int c1 = close(ctpf[0]);
+	int c2 = close(ptcf[1]);
+	if (c1 != 0) {
+		perror("Error closing pipe 1");
+		return c1;
+	}
+	if (c2 != 0) {
+		perror("Error closing pipe 2");
+		return c2;
+	}
+	return 0;
 }
 
 void set_unblock_read(int read_fd) {
@@ -116,27 +142,43 @@ void set_unblock_read(int read_fd) {
 	fcntl(read_fd, F_SETFL, flags);
 }
 
-//TODO refactor code in the main loop to functions
-//TODO implement more error handling
 //TODO add comments
 int main() {
 
 	int router_pid = getpid();
 	printf("Parent PID = %d\n", router_pid);
 	// create pipes and fork for controller
-	create_pipes(0);
+	if (create_pipes(0) != 0) {
+		return -1;
+	}
 	int controller = fork();
 	if (controller == 0) {
 		// controller process, create window
 		printf("Controller PID = %d\n", getpid());
-		close_pipe_ends_child(0);
+		if (close_pipe_ends_child(0) != 0) {
+			perror("Cannot close pipe ends on controller.  Exiting...");
+			return -1;
+		}
 		browser_window *bw_controller;
 		create_browser(CONTROLLER_TAB, 0, G_CALLBACK(new_tab_created_cb),
 				G_CALLBACK(uri_entered_cb), &bw_controller, channel[0]);
 		show_browser();
 	} else {
 		// router process
-		close_pipe_ends_parent(0);
+		if (close_pipe_ends_parent(0) != 0) {
+			perror("Cannot close pipe ends on router.  Exiting...");
+			child_req_to_parent req;
+			req.type = TAB_KILLED;
+			req.req.killed_req.tab_index = 0;
+			if (write(channel[0].parent_to_child_fd[1], &req, sizeof(req))
+					== -1) {
+				perror("Unable to send kill request to controller!");
+				// something seriously went wrong
+				return -1;
+			}
+			// something is only kind of wrong
+			return -1;
+		}
 		int comm_index = 0;
 		int pipe_status[] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		int read_controller_fd = channel[0].child_to_parent_fd[0];
@@ -191,7 +233,9 @@ int main() {
 							"No more free tabs.  Please close a tab to open a new one.";
 					perror(error_message);
 					//TODO: get popup alert to work
-					//alert(error_message);
+					gchar alertmsg[] =
+							"No more free tabs.  Please close a tab to open a new one.";
+					alert(alertmsg);
 					continue;
 				}
 
@@ -199,7 +243,10 @@ int main() {
 				printf("PID = %d and parent %d\n", getpid(), getppid());
 				if (pid == 0) {
 					// tab process, create tab window
-					close_pipe_ends_child(unused_tab);
+					if (close_pipe_ends_child(unused_tab) != 0) {
+						perror("Cannot close pipe ends in tab process!");
+						return -1;
+					}
 					read_router_fd = channel[unused_tab].parent_to_child_fd[0];
 					set_unblock_read(read_router_fd);
 					create_browser(URL_RENDERING_TAB, unused_tab, G_CALLBACK(
@@ -209,7 +256,10 @@ int main() {
 				} else {
 					// router process, increment counters
 
-					close_pipe_ends_parent(unused_tab);
+					if (close_pipe_ends_parent(unused_tab) != 0) {
+						perror("Cannot close pipe ends in router process!");
+						return -1;
+					}
 					pipe_status[unused_tab] = 1;
 					read_router_fd = channel[unused_tab].child_to_parent_fd[0];
 					set_unblock_read(read_router_fd);
@@ -229,8 +279,11 @@ int main() {
 
 					} else {
 						// router process, send uri request to tab process
-						write(channel[tab_index].parent_to_child_fd[1],
-								&request, sizeof(request));
+						if (write(channel[tab_index].parent_to_child_fd[1],
+								&request, sizeof(request)) == -1) {
+							perror(
+									"Warning, unable to send uri request to tab process");
+						}
 					}
 				} else {
 					// tab process, render page in window
@@ -246,17 +299,23 @@ int main() {
 				printf("mooo\n");
 				int tab_index = request.req.killed_req.tab_index;
 				if (getpid() == router_pid) {
-					write(channel[tab_index].parent_to_child_fd[1], &request,
-							sizeof(request));
-					close_pipe_ends_child(tab_index);
+					if (write(channel[tab_index].parent_to_child_fd[1],
+							&request, sizeof(request)) == -1) {
+						perror(
+								"Error, unable to send kill tab request from router to tab");
+					}
+					if (close_pipe_ends_child(tab_index) != 0) {
+						perror("Cannot close pipe ends in router tab kill!");
+						return -1;
+					}
 					pipe_status[tab_index] = 0;
 					// send kill signal to tab
-
-					//					}
 					tabs--;
 				} else {
 					// tab process, close pipes
-					close_pipe_ends_parent(tab_index);
+					if (close_pipe_ends_parent(tab_index) != 0) {
+						perror("Cannot close pipe ends in tab process!");
+					}
 					process_all_gtk_events();
 					printf("Exiting:PID = %d and tab # = %d\n", getpid(),
 							tab_index);
