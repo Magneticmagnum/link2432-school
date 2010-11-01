@@ -35,7 +35,7 @@ void uri_entered_cb(GtkWidget* entry, gpointer data) {
 	int tab_index = query_tab_id_for_request(entry, data);
 	if (tab_index <= 0) {
 		//Append code for error handling
-		perror("Error invalid tab index");
+		perror("Error invalid tab index.");
 	}
 
 	// Get the URL.
@@ -145,9 +145,6 @@ void set_unblock_read(int read_fd) {
 	fcntl(read_fd, F_SETFL, flags);
 }
 
-//TODO refactor code in the main loop to functions
-//TODO implement more error handling
-//TODO add comments
 void bookmark_curr_page_cb(void *data) {
 	browser_window* b_window = (browser_window*) data;
 
@@ -160,7 +157,8 @@ void bookmark_curr_page_cb(void *data) {
 	} else {
 		int num_marks = ptr[0].bookmarks_count;
 		if (num_marks < MAX_BOOKMARKS) {
-			strcpy(ptr[num_marks].uri, curr_webpage);
+			bookmarks* bm = &(ptr[num_marks]);
+			strcpy(bm->uri, curr_webpage);
 			ptr[0].bookmarks_count++;
 		} else {
 			gchar err[] = "Too many bookmarks!";
@@ -173,6 +171,8 @@ void assign_bookmark_id() {
 	shared_bookmarks = shmget(SHM_KEY, MAX_BOOKMARKS * sizeof(bookmarks),
 			IPC_CREAT | 0777);
 }
+//TODO add comments
+
 int main()
 
 {
@@ -205,8 +205,8 @@ int main()
 			child_req_to_parent req;
 			req.type = TAB_KILLED;
 			req.req.killed_req.tab_index = 0;
-			if (write(channel[0].parent_to_child_fd[1], &request,
-					sizeof(request)) == -1) {
+			if (write(channel[0].parent_to_child_fd[1], &req, sizeof(req))
+					== -1) {
 				perror("Unable to send kill request to controller!");
 				// something seriously went wrong
 				return -1;
@@ -314,8 +314,11 @@ int main()
 
 					} else {
 						// router process, send uri request to tab process
-						write(channel[tab_index].parent_to_child_fd[1],
-								&request, sizeof(request));
+						if (write(channel[tab_index].parent_to_child_fd[1],
+								&request, sizeof(request)) == -1) {
+							perror(
+									"Warning, unable to send uri request to tab process");
+						}
 					}
 				} else {
 					// tab process, render page in window
@@ -331,8 +334,11 @@ int main()
 				printf("mooo\n");
 				int tab_index = request.req.killed_req.tab_index;
 				if (getpid() == router_pid) {
-					write(channel[tab_index].parent_to_child_fd[1], &request,
-							sizeof(request));
+					if (write(channel[tab_index].parent_to_child_fd[1],
+							&request, sizeof(request)) == -1) {
+						perror(
+								"Error, unable to send kill tab request from router to tab");
+					}
 					if (close_pipe_ends_child(tab_index) != 0) {
 						perror("Cannot close pipe ends in router tab kill!");
 						return -1;
