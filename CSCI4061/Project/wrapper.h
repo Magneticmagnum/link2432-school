@@ -1,10 +1,11 @@
 #ifndef __MAIN_H_
 #define __MAIN_H_
 
-#include <gtk/gtk.h>
+#include <gtk/gtk.h> 
 #include <webkit/webkit.h>
 
-#define INITIAL_TAB_OFFSET 1
+
+#define INITIAL_TAB_OFFSET 1 
 #define WINDOW_WIDTH 700
 #define WINDOW_HEIGHT 400
 #define UNRECLAIMED_TAB_COUNTER 10
