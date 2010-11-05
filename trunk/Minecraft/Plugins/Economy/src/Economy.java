@@ -23,8 +23,6 @@ public class Economy extends Plugin {
 		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, listener,
 				this, PluginListener.Priority.MEDIUM);
 
-		EconomyData.openDb();
-
 	}
 
 	@Override

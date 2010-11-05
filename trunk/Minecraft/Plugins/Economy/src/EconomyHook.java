@@ -41,11 +41,11 @@ public class EconomyHook extends PluginListener {
 	@Override
 	public void onLogin(Player player) {
 		// TODO Auto-generated method stub
-		EconomyPerson person = EconomyData.loadProfile(player);
+		EconomyPerson person = EconomyData.playerLoggedIn(player);
 		if (person != null) {
 			Economy.log.info("Loaded economy profile for " + player.getName());
 			player.sendMessage("Welcome, " + player.getName()
-					+ "!  Your wallet contains $" + person.money);
+					+ "!  Your wallet contains $" + person.getMoney());
 		}
 	}
 
