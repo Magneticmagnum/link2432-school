@@ -2,7 +2,7 @@ import java.util.logging.Logger;
 
 public class Economy extends Plugin {
 	static final EconomyHook listener = new EconomyHook();
-	private Logger log;
+	public static Logger log;
 	private String name = "Economy";
 	private String version = "1.0";
 
@@ -18,6 +18,9 @@ public class Economy extends Plugin {
 				listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_SEND,
 				listener, this, PluginListener.Priority.MEDIUM);
+
+		EconomyData.openDb();
+
 	}
 
 	@Override
