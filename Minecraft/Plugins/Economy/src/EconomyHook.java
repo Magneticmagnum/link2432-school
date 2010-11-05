@@ -9,7 +9,6 @@ public class EconomyHook extends PluginListener {
 		Block block = cast.getTargetBlock();
 		if (block != null) {
 			int id = block.getType();
-			player.sendMessage("ATM! " + id);
 			if (id == ATM_ID) {
 				player.sendMessage("You clicked on an atm block");
 				return true;
@@ -31,12 +30,29 @@ public class EconomyHook extends PluginListener {
 	@Override
 	public boolean onSendComplexBlock(Player player, ComplexBlock block) {
 		// TODO Auto-generated method stub
-		player.sendMessage("Send complex block!");
 		Block simple = etc.getServer().getBlockAt(block.getX(), block.getY(),
 				block.getZ());
 		if (simple.getType() == 54) {
 			player.sendMessage("ATM!");
 		}
 		return true;
+	}
+
+	@Override
+	public void onLogin(Player player) {
+		// TODO Auto-generated method stub
+		EconomyPerson person = EconomyData.loadProfile(player);
+		if (person != null) {
+			Economy.log.info("Loaded economy profile for " + player.getName());
+			player.sendMessage("Welcome, " + player.getName()
+					+ "!  Your wallet contains $" + person.money);
+		}
+	}
+
+	@Override
+	public void onDisconnect(Player player) {
+		// TODO Auto-generated method stub
+		EconomyPerson person = EconomyData.getEconomyProfile(player);
+		EconomyData.saveProfile(person);
 	}
 }

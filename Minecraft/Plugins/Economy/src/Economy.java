@@ -18,6 +18,10 @@ public class Economy extends Plugin {
 				listener, this, PluginListener.Priority.MEDIUM);
 		etc.getLoader().addListener(PluginLoader.Hook.COMPLEX_BLOCK_SEND,
 				listener, this, PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.LOGIN, listener, this,
+				PluginListener.Priority.MEDIUM);
+		etc.getLoader().addListener(PluginLoader.Hook.DISCONNECT, listener,
+				this, PluginListener.Priority.MEDIUM);
 
 		EconomyData.openDb();
 
