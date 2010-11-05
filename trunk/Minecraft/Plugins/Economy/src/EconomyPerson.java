@@ -1,6 +1,8 @@
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 
-public class EconomyPerson {
+public class EconomyPerson implements Serializable {
+	private static final long serialVersionUID = 1565470329567136861L;
 	private String name;
 	private int money;
 
