@@ -22,6 +22,9 @@ public class EconomyHook extends PluginListener {
 	public boolean onComplexBlockChange(Player player, ComplexBlock block) {
 		// TODO Auto-generated method stub
 		player.sendMessage("Complex block changed");
+		if (block instanceof Chest) {
+			Chest chest = (Chest) block;
+		}
 		return true;
 	}
 
