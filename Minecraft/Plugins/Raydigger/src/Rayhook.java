@@ -28,11 +28,16 @@ public class Rayhook extends PluginListener {
 		// TODO Auto-generated method stub
 		if (split[0].equalsIgnoreCase("/ray")) {
 			int range = 0;
+			int id = 0;
 			if (split[1] != null) {
 				Integer i = Integer.parseInt(split[1]);
 				range = i.intValue();
 			}
-			tool.activate(player, range);
+			if (split[2] != null) {
+				Integer i = Integer.parseInt(split[2]);
+				id = i.intValue();
+			}
+			tool.activate(player, range, id);
 			return true;
 		}
 		return false;

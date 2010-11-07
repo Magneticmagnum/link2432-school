@@ -10,6 +10,7 @@ public class Raytool {
 
 	private class RaytoolProperties {
 		public int range = 5;
+		public int blockid = 0;
 		public int status;
 	}
 
@@ -18,7 +19,7 @@ public class Raytool {
 		activatedTools = new HashMap<Player, RaytoolProperties>();
 	}
 
-	public void activate(Player player, int range) {
+	public void activate(Player player, int range, int id) {
 		RaytoolProperties props = activatedTools.get(player);
 		if (props != null) {
 			if (range == 0) {
@@ -27,6 +28,7 @@ public class Raytool {
 				props.status = ACTIVE;
 				props.range = range;
 			}
+			props.blockid = id;
 		} else {
 			props = new RaytoolProperties();
 			if (range > 0) {
@@ -36,6 +38,7 @@ public class Raytool {
 				props.range = 0;
 				props.status = INACTIVE;
 			}
+			props.blockid = id;
 			activatedTools.put(player, props);
 		}
 		notifyPlayer(player, props);
@@ -52,16 +55,17 @@ public class Raytool {
 	public void use(Player player) {
 		RaytoolProperties props = activatedTools.get(player);
 		if (props != null) {
-			Raydigger.log.info("Properties for " + player + " " + props.status
-					+ " " + props.range);
+			// Raydigger.log.info("Properties for " + player + " " +
+			// props.status
+			// + " " + props.range);
 			if (props.status == ACTIVE) {
 				if (props.range > 0) {
-					Raydigger.log.info(player + " used a ray with length "
-							+ props.range);
+					Raydigger.log.info(player.getName()
+							+ " used a ray with length " + props.range);
 					HitBlox caster = new HitBlox(player);
 					int i = 0;
 					while (i < props.range) {
-						caster.setCurBlock(0);
+						caster.setCurBlock(props.blockid);
 						caster.getNextBlock();
 						i++;
 					}
