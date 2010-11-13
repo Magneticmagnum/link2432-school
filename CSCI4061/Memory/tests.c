@@ -6,24 +6,26 @@
  */
 #include "mm_public.h"
 
-typedef struct {
-	char str[64];
-} thing;
 int main() {
 	mm_t memguy;
-	mm_init(&memguy, 100, 64);
-	printf("Init memory manager with 100 chunks, 64 bytes each memguy at %d\n",
-			(int) &memguy);
-	printf("Grabbing memory chunk...\n");
-	void* chunk = mm_get(&memguy);
-	printf("memory at %d\n", (int) chunk);
-	printf("memguy head now %d\n", memguy.head);
-	thing* that = (thing*) mm_get(&memguy);
-	printf("setting parts of thing\n");
-	strcpy(that->str, "this is some long string!!");
-	printf("reading from get'd memory... %s\n", that->str);
-	printf("returning memory to pool");
-	mm_put(&memguy, that);
+	struct timeval timestart, timeend;
+	mm_init(&memguy, 1024 * 64, 1024);
+	gettimeofday(&timestart, NULL);
+	int i;
+	for (i = 0; i < 1024 * 64; i++) {
+		mm_get(&memguy);
+	}
+	gettimeofday(&timeend, NULL);
+	double tm = comp_time(timestart, timeend);
+	printf("Time taken to get 64MB with memory manager %f ms\n", tm / 1000.0);
+	mm_release(&memguy);
+	gettimeofday(&timestart, NULL);
+	for (i = 0; i < 1024 * 64; i++) {
+		malloc(1024);
+	}
+	gettimeofday(&timeend, NULL);
+	tm = comp_time(timestart, timeend);
+	printf("Time taken to allocate 64MB with malloc %f ms\n", tm / 1000.0);
 	return 0;
 
 }
