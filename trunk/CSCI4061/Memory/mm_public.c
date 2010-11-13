@@ -16,54 +16,46 @@ double comp_time(struct timeval times, struct timeval timee) {
 }
 
 /* Write these ... */
-// Init the mm_t memory manager
-// allocates hm number of chunks
-// sets inuse of each chunk to 0 and allocates sz bytes of raw memory
+// just init variables in MM struct
+// set head to 0 and malloc how many * size of each chunk
 void mm_init(mm_t *MM, int hm, int sz) {
-	MM->nchunk = hm;
-	MM->szchunk = sz;
+	MM->start = malloc(hm * sz);
 	MM->head = 0;
-	MM->chunks = malloc(sizeof(mm_chunk) * hm);
-	int i;
-	for (i = 0; i < hm; i++) {
-		MM->chunks[i].inuse = 0;
-		MM->chunks[i].chunk = malloc(sz);
-	}
+	MM->hm = hm;
+	MM->sz = sz;
 }
 
 // if available, returns a raw section of memory
+// if head is equal or greater to how many, return null because there are none left
+// otherwise return the current offset (start + head * size)
+// and then increment head
 void* mm_get(mm_t *MM) {
-	int nch = MM->nchunk;
-	int head = MM->head;
-	void* raw;
-	if (head < nch) {
-		raw = MM->chunks[head].chunk;
-		MM->chunks[head].inuse = 1;
-		head++;
-		MM->head = head;
+	if (MM->head >= MM->hm) {
+		return (void *) NULL;
 	}
+	// calculate the offset by taking our index * the size of chunk
+	void* raw = MM->start + MM->head * MM->sz;
+	MM->head++;
 	return raw;
 }
 
 // put a raw section of memory back
+// it doesn't necessarily put the memory back so much as simply
+// decrement the head pointer, making that chunk of memory available
+// for getting
 void mm_put(mm_t *MM, void *chunk) {
 	int head = MM->head;
 	head--;
-	if (head > -1) {
-		MM->chunks[head].chunk = chunk;
-		MM->chunks[head].inuse = 0;
-		MM->head = head;
+	if (head == -1) {
+		head = 0;
 	}
+	MM->head = head;
 }
 
+// just release the allocated portion, since the struct passed will
+// be taken care of when the stack frame is popped (or the program exits)
 void mm_release(mm_t *MM) {
-	int nch = MM->nchunk;
-	int i;
-	for (i = 0; i < nch; i++) {
-		free(MM->chunks[i].chunk);
-	}
-	free(MM->chunks);
-	free(MM);
+	free(MM->start);
 }
 
 void timer_example() {
