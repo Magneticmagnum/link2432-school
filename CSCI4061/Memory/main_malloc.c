@@ -1,3 +1,10 @@
+/*
+ * main_malloc.c
+ *
+ *  Created on: Nov 13, 2010
+ *      Author: Chaichana Noree
+ */
+
 #include "mm_public.h"
 
 int main(void){
