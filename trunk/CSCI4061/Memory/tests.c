@@ -1,3 +1,5 @@
+#ifndef MAIN
+#define MAIN
 /*
  * tests.c
  *
@@ -7,13 +9,16 @@
 #include "mm_public.h"
 
 int main() {
+	void *memtest[500000];
 	mm_t memguy;
 	struct timeval timestart, timeend;
-	mm_init(&memguy, 1024 * 64, 1024);
+	mm_init(&memguy, 500000, 64);
 	gettimeofday(&timestart, NULL);
 	int i;
-	for (i = 0; i < 1024 * 64; i++) {
-		mm_get(&memguy);
+	for (i = 0; i < 500000; i++) {
+		if ((memtest[i] = mm_get(&memguy)) == NULL) {
+			fprintf(stderr, "mm_get failed");
+		}
 	}
 	gettimeofday(&timeend, NULL);
 	double tm = comp_time(timestart, timeend);
@@ -29,3 +34,4 @@ int main() {
 	return 0;
 
 }
+#endif
