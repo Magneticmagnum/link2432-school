@@ -15,6 +15,9 @@ main_mm : main_mm.c mm_public.o
 
 mm_public.o : mm_public.c mm_public.h
 	gcc ${CFLAGS} -c mm_public.c
+	
+packet : packet_public.c mm_public.o
+	gcc ${CFLAGS} -o packet packet_public.c mm_public.o
 
 clean:
-	rm -rf mm_public.o main_mm main_malloc
+	rm -rf mm_public.o main_mm main_malloc packet
