@@ -62,7 +62,7 @@ void* mm_get(mm_t *MM) {
 // put a raw section of memory back
 // it doesn't necessarily put the memory back so much as simply
 // decrement the head pointer, making that chunk of memory available
-// for getting
+// for getting.
 void mm_put(mm_t *MM, void *chunk) {
 	int head = MM->head;
 	head--;
