@@ -8,10 +8,11 @@
 #include "mm_public.h"
 
 int main(void){
-	clock_t start, end;
-	double total_time;
+	struct timeval start, end;
+	int timer;
 
-	start = clock();
+	timer = gettimeofday(&start, (void *)NULL);
+
 	void *memtest[500000];
 
 	int i;
@@ -19,14 +20,13 @@ int main(void){
 		memtest[i]=malloc(64);
 	}
 
-	int j;
-	for(j = 0; j<500000; j++){
+	for(i = 0; j<500000; j++){
 		free(memtest[j]);
 	}
 
-	end = clock();
-	total_time = ((double) (end-start))/CLOCKS_PER_SEC;
-	fprintf(stderr, "Time taken using malloc: %f seconds", total_time);
+	timer = gettimeofday (&end, (void *)NULL);
+	fprintf(stderr, "Time taken using malloc: %f ms",
+			comp_time (start, end)/1000.0);
 	return 0;
 
 }
