@@ -19,8 +19,6 @@ int main() {
 
 	mm_init(&memguy, 500000, 1024);
 
-	start = clock();
-
 	//Allocate the blocks
 	int i;
 	for (i = 0; i < 500000; i++) {
@@ -35,7 +33,7 @@ int main() {
 	mm_release(&memguy);
 
 	timer = gettimeofday(&end, (void *)NULL);
-	fprintf("Time taken to get 64MB with memory manager %f ms\n", comp_time(start, end)/1000.0);
+	fprintf(stderr, "Time taken to get 64MB with memory manager %f ms\n", comp_time(start, end)/1000.0);
 
 	return 0;
 }
