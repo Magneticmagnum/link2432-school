@@ -12,6 +12,7 @@ typedef struct {
 	int head;
 	int sz;
 	int hm;
+	int clrmm;
 } mm_t;
 
 /* These will be defined in mm_public.c ... by you */

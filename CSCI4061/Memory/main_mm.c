@@ -8,18 +8,33 @@
 #include "mm_public.h"
 
 int main() {
+	void *memtest[500000];
+	clock_t start, end;
+	double total_time;
+
 	mm_t memguy;
-	struct timeval timestart, timeend;
-	mm_init(&memguy, 1024 * 64, 1024);
-	gettimeofday(&timestart, NULL);
+
+	mm_init(&memguy, 500000, 1024);
+
+	start = clock();
+
 	int i;
-	for (i = 0; i < 1024 * 64; i++) {
-		mm_get(&memguy);
+	//Allocate the blocks
+	for (i = 0; i < 500000; i++) {
+		if ((memtest[i] = mm_get(&memguy)) == NULL) {
+			fprintf(stderr, "mm_get failed");
+		}
 	}
-	gettimeofday(&timeend, NULL);
-	double tm = comp_time(timestart, timeend);
-	printf("Time taken to get 64MB with memory manager %f ms\n", tm / 1000.0);
+	//Free the blocks
+	for (i = 0; i < 500000; i++){
+		mm_put(&memguy, memtest[i]);
+	}
 	mm_release(&memguy);
+
+	end = clock();
+	total_time = ((double) (end-start))/CLOCKS_PER_SEC;
+
+	printf("Time taken to get 64MB with memory manager %f ms\n", total_time);
 
 	return 0;
 }

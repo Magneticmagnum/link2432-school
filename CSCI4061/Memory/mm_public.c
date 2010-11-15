@@ -19,7 +19,27 @@ double comp_time(struct timeval times, struct timeval timee) {
 // just init variables in MM struct
 // set head to 0 and malloc how many * size of each chunk
 void mm_init(mm_t *MM, int hm, int sz) {
+	/**
+	 * Handle of MM that already points to an already initialized mm_t struct
+	 */
+	if(MM == NULL){
+		MM = malloc(sizeof(mm_t));
+		MM->clrmm = 1;
+		if(MM == NULL){
+			perror("Error allocating memory");
+			return;
+		}
+	}
+	/**
+	 * Allocate memory and set internal parameters
+	 */
 	MM->start = malloc(hm * sz);
+	if (MM->start == NULL){
+		perror("error allocating memory");
+		if(MM->clrmm == 1){
+			free(MM);
+		}
+	}
 	MM->head = 0;
 	MM->hm = hm;
 	MM->sz = sz;
@@ -56,6 +76,9 @@ void mm_put(mm_t *MM, void *chunk) {
 // be taken care of when the stack frame is popped (or the program exits)
 void mm_release(mm_t *MM) {
 	free(MM->start);
+	if (MM->clrmm == 1){
+		free(MM);
+	}
 }
 
 void timer_example() {
