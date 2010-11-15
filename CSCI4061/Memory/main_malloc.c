@@ -25,7 +25,7 @@ int main(void){
 	}
 
 	timer = gettimeofday (&end, (void *)NULL);
-	fprintf(stderr, "Time taken using malloc: %f ms",
+	fprintf(stderr, "Time taken using malloc: %f ms\n",
 			comp_time (start, end)/1000.0);
 	return 0;
 
