@@ -20,8 +20,8 @@ int main(void){
 		memtest[i]=malloc(64);
 	}
 
-	for(i = 0; j<500000; j++){
-		free(memtest[j]);
+	for(i = 0; i<500000; i++){
+		free(memtest[i]);
 	}
 
 	timer = gettimeofday (&end, (void *)NULL);
