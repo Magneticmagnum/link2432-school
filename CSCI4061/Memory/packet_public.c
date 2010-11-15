@@ -33,6 +33,7 @@ void packet_handler(int sig)
 	if (pkt.which == 0){
 		pkt_total = pkt.how_many;
 	}
+	//allocate a packet in user created memory manager
 	message.data[pkt.which] = (char *)mm_get(&MM);
 	strncpy(message.data[pkt.which], pkt.data, 65);
 	pkt_cnt++;
