@@ -38,7 +38,7 @@ void packet_handler(int sig)
   }
   //allocate a packet in user created memory manager
   message.data[pkt.which] = (char *) mm_get(&MM);
-  strncpy(message.data[pkt.which], pkt.data, 56);
+  strncpy(message.data[pkt.which], pkt.data, 64);
   pkt_cnt++;
 }
 
