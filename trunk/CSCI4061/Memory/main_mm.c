@@ -31,7 +31,8 @@ int main() {
 	}
 	//Free the blocks
 	for (i = 0; i < 500000; i++){
-		mm_put(&memguy, memtest[i]);
+		if(mm_put(&memguy, memtest[i]) == -1)
+			fprintf(stderr, "Error freeing memory.");
 	}
 	mm_release(&memguy);
 
