@@ -2,7 +2,7 @@
 
 #define MaxPackets 10
 
-typedef char data_t[56];
+typedef char data_t[64];
 
 typedef struct {
   int how_many; /* number of packets in the message */
@@ -14,6 +14,6 @@ typedef struct {
 /* Keeps track of packets that have arrived for the message */
 typedef struct {
   int num_packets;
-  void *data[MaxPackets];
+  void* data[MaxPackets];
 } message_t;
 
