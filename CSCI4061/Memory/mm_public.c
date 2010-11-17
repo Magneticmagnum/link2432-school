@@ -77,6 +77,7 @@ void* mm_get(mm_t *MM)
     return (void *) NULL;
   }
   void* raw = MM->queue[MM->queue_out++ % MM->count];
+  //  printf("getting %i\n", raw);
   return raw;
 }
 
@@ -88,6 +89,7 @@ void mm_put(mm_t *MM, void *chunk)
 {
   if (chunk >= MM->start && chunk < MM->end && MM->queue_in < MM->queue_out
       + MM->count) {
+    //    printf("putting %i\n", chunk);
     MM->queue[MM->queue_in++ % MM->count] = chunk;
   }
 }
