@@ -5,7 +5,7 @@
 
 CFLAGS = -g -Wall -03
 
-all : main_mm main_malloc packet
+all : main_mm main_malloc mm_publicB.o test packet
 
 main_malloc : main_malloc.c mm_public.o
 	gcc ${CFLAGS} -o main_malloc main_malloc.c mm_public.o
@@ -15,6 +15,9 @@ main_mm : main_mm.c mm_public.o
 
 mm_public.o : mm_public.c mm_public.h
 	gcc ${CFLAGS} -c mm_public.c
+	
+mm_publicB.o : mm_publicB.c mm_publicB.h
+	gcc ${CFLAGS} -c mm_publicB.c
 	
 packet : packet_public.c mm_public.o
 	gcc ${CFLAGS} -o packet packet_public.c mm_public.o
@@ -27,4 +30,4 @@ test : tests.c mm_public.o
 	gcc ${CFLAGS} -o tests tests.c mm_public.o
 
 clean:
-	rm -rf mm_public.o main_mm main_malloc packet
+	rm -rf mm_public.o main_mm main_malloc packet test
