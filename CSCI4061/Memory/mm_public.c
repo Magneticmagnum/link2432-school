@@ -1,4 +1,4 @@
-#include "mm_public.h"
+#include "mm_publicB.h"
 
 /* Return usec */
 double comp_time(struct timeval times, struct timeval timee) {
@@ -18,14 +18,14 @@ double comp_time(struct timeval times, struct timeval timee) {
 /* Write these ... */
 // just init variables in MM struct
 // set head to 0 and malloc how many * size of each chunk
-void mm_init(mm_t *MM, int hm, int sz) {
+int mm_init(mm_t *MM, int hm, int sz) {
 	/**
 	 * Handle of MM that already points to an already initialized mm_t struct
 	 */
-	if(MM == NULL){
+	if (MM == NULL) {
 		MM = malloc(sizeof(mm_t));
 		MM->clrmm = 1;
-		if(MM == NULL){
+		if (MM == NULL) {
 			perror("Error allocating memory");
 			return -1;
 		}
@@ -34,15 +34,34 @@ void mm_init(mm_t *MM, int hm, int sz) {
 	 * Allocate memory and set internal parameters
 	 */
 	MM->start = malloc(hm * sz);
-	if (MM->start == NULL){
+	if (MM->start == NULL) {
 		perror("error allocating memory");
-		if(MM->clrmm == 1){
+		if (MM->clrmm == 1) {
 			free(MM);
+			return -1;
 		}
 	}
-	MM->head = 0;
-	MM->hm = hm;
-	MM->sz = sz;
+	MM->end = MM->start + hm * sz;
+	MM->queue = malloc(sizeof(void**) * hm);
+	if (MM->queue == NULL) {
+		perror("error allocating memory");
+		free(MM->start);
+		if (MM->clrmm == 1) {
+			free(MM);
+			return -1;
+		}
+	}
+	int i = 0;
+	for (; i < hm; i++) {
+		MM ->queue[i] = MM->start + i * sz;
+	}
+	MM->queue_out = 0;
+	MM->queue_in = hm;
+
+	MM->count = hm;
+	MM->size = sz;
+
+	return 0;
 }
 
 // if available, returns a raw section of memory
@@ -50,12 +69,10 @@ void mm_init(mm_t *MM, int hm, int sz) {
 // otherwise return the current offset (start + head * size)
 // and then increment head
 void* mm_get(mm_t *MM) {
-	if (MM->head >= MM->hm) {
+	if (MM->queue_out >= MM->queue_in) {
 		return (void *) NULL;
 	}
-	// calculate the offset by taking our index * the size of chunk
-	void* raw = MM->start + MM->head * MM->sz;
-	MM->head++;
+	void* raw = MM->queue[MM->queue_out++ % MM->count];
 	return raw;
 }
 
@@ -64,19 +81,22 @@ void* mm_get(mm_t *MM) {
 // decrement the head pointer, making that chunk of memory available
 // for getting.
 void mm_put(mm_t *MM, void *chunk) {
-	int head = MM->head;
-	head--;
-	if (head == -1) {
-		head = 0;
+
+	if (chunk == NULL)
+		return -1;
+
+	if (chunk >= MM->start && chunk < MM->end && MM->queue_in < MM->queue_out
+			+ MM->count) {
+		MM->queue[MM->queue_in++ % MM->count] = chunk;
 	}
-	MM->head = head;
 }
 
 // just release the allocated portion, since the struct passed will
 // be taken care of when the stack frame is popped (or the program exits)
 void mm_release(mm_t *MM) {
 	free(MM->start);
-	if (MM->clrmm == 1){
+	free(MM->queue);
+	if (MM->clrmm == 1) {
 		free(MM);
 	}
 }
