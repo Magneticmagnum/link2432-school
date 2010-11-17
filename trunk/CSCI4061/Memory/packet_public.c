@@ -24,6 +24,8 @@ packet_t get_packet () {
 
 void packet_handler(int sig)
 {
+
+
 	packet_t pkt;
 
 	/*  fprintf (stderr, "IN PACKET HANDLER, sig=%d\n", sig); */

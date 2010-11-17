@@ -17,7 +17,10 @@ int main() {
 
 	mm_t memguy;
 
-	mm_init(&memguy, 500000, 1024);
+	if (mm_init(&memguy, 500000, 1024) == -1){
+		fprintf(stderr, "Error initializing MM");
+		exit(1);
+	}
 
 	//Allocate the blocks
 	int i;

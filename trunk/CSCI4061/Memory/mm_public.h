@@ -9,14 +9,19 @@
 /* Fill this in */
 typedef struct {
 	void* start;
-	int head;
-	int sz;
-	int hm;
+	void* end;
+
+	void** queue;
+        int queue_out;
+        int queue_in;
+
+	int size;
+	int count;
 	int clrmm;
 } mm_t;
 
 /* These will be defined in mm_public.c ... by you */
-void mm_init(mm_t *MM, int hm, int sz);
+int mm_init(mm_t *MM, int hm, int sz);
 void* mm_get(mm_t *MM);
 void mm_put(mm_t *MM, void *chunk);
 void mm_release(mm_t *MM);
