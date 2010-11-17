@@ -27,7 +27,7 @@ void mm_init(mm_t *MM, int hm, int sz) {
 		MM->clrmm = 1;
 		if(MM == NULL){
 			perror("Error allocating memory");
-			return;
+			return -1;
 		}
 	}
 	/**
