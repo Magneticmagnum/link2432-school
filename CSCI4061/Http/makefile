@@ -2,9 +2,9 @@ CC = gcc
 CFLAGS = -D_REENTRANT
 LDFLAGS = -lpthread -lnsl
 
-all: util_http
+all: http.o
 
-util_http: http util-http.o
+http.o:
 	${CC} ${CFLAGS} -c http.c
 
 clean:
