@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -D_REENTRANT
-LDFLAGS = -lpthread lsocket
+LDFLAGS = -lpthread -lsocket
 
 all: util_http
 
