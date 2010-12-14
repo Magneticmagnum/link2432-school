@@ -74,7 +74,7 @@ bool Microwave::isRunning() {
 void Microwave::activate(std::string args) {
 	running_ = true;
 	std::vector<std::string> *parse = parseString2List(args, ",");
-	if ((*parse)[0].c_str() == "") {
+	if ((*parse)[0] == "") {
 		runTimeLeft_ = r_();
 	} else {
 		runTimeLeft_ = atoi((*parse)[0].c_str());
