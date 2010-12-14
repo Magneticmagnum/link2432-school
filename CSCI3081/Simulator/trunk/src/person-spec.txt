@@ -1,0 +1,2 @@
+name-sleep next-wakeUp type-delay parameters-90
+name-wakeUp next-gettingReady type-delay parameters-10

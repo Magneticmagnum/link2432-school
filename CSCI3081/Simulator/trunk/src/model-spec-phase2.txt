@@ -1,0 +1,8 @@
+name-Dishwasher type-Dishwasher powerOn-2.0 powerOff-0.004
+name-Microwave type-Microwave powerOn-1.5 powerOff-0
+name-Oven type-Oven powerPreheat-7.5 powerOn-2.5 powerOff-0
+name-Refrigerator type-Refrigerator onTime-3 powerOn-0.3 powerOff-0 dutyCycleCooking-0.5 dutyCycleNotCooking-0.3
+name-Stove type-Stove powerOn-1.4 powerOff-0
+name-Television type-Television powerOn-0.18 powerOff-0.01
+name-Toaster type-Toaster powerOn-0.9 powerOff-0
+name-WaterHeater type-WaterHeater capacity-200 powerOn-3.0 powerOff-0
