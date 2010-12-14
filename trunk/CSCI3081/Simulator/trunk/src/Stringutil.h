@@ -11,14 +11,10 @@
 #include <string>
 #include <vector>
 
-class Stringutil {
-public:
 	// Parses a string into a vector with seperator sep
 	// "this-is-a-test" "-"
 	// [this, is, a, test]
 
-	static std::vector<std::string>* parseString2List(std::string &str,
+std::vector<std::string>* parseString2List(std::string &str,
 			const char* sep);
-
-};
 #endif /* STRINGUTIL_H_ */

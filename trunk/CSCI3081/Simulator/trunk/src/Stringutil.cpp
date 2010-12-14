@@ -10,8 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-std::vector<std::string>* Stringutil::parseString2List(std::string &str,
-		const char* sep) {
+std::vector<std::string>* parseString2List(std::string &str, const char* sep) {
 	char* cstr = (char*) malloc(strlen(str.c_str()));
 	strcpy(cstr, str.c_str());
 	std::vector<std::string> *ret = new std::vector<std::string>();
