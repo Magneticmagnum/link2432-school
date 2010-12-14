@@ -80,14 +80,14 @@ void PersonSM::tick() {
 int PersonSM::activate(stateargs_t* currentstate) {
 	// log just entered state
 	currentstate->stateentry = false;
-	std::vector<std::string> *parsed = parseString2List(currentstate->params,
+	std::vector<std::string> *parsed = Stringutil::parseString2List(currentstate->params,
 			"|");
 	std::vector<std::string>::iterator begin = parsed->begin();
 	std::vector<std::string>::iterator end = parsed->end();
 	while (begin != end) {
 		House* inst = House::getInstance();
 		Model *mod;
-		std::vector<std::string> *subparse = parseString2List(
+		std::vector<std::string> *subparse = Stringutil::parseString2List(
 				currentstate->params, ":");
 		if (subparse->size() == 2) {
 			// model needs to take a comma seperated argument list
@@ -109,7 +109,7 @@ int PersonSM::waitOnTarget(stateargs_t* currentstate) {
 	// parse everything, add model string list to pointer array
 	if (currentstate->stateentry) {
 		House* inst = House::getInstance();
-		std::vector<std::string>* parse = parseString2List(
+		std::vector<std::string>* parse = Stringutil::parseString2List(
 				currentstate->params, "|");
 		currentstate->models = new Model*[parse->size()];
 		std::vector<std::string>::iterator begin = parse->begin();
@@ -138,7 +138,7 @@ int PersonSM::waitOnTarget(stateargs_t* currentstate) {
 
 int PersonSM::randomTime(stateargs_t* currentstate) {
 	if (currentstate->stateentry) {
-		std::vector<std::string>* parse = parseString2List(
+		std::vector<std::string>* parse = Stringutil::parseString2List(
 				currentstate->params, "|");
 		int min = atoi((*parse)[0].c_str());
 		int max = atoi((*parse)[1].c_str());
@@ -157,7 +157,7 @@ int PersonSM::randomTime(stateargs_t* currentstate) {
 
 int PersonSM::upperTime(stateargs_t* currentstate) {
 	if (currentstate->stateentry) {
-		std::vector<std::string>* parse = parseString2List(
+		std::vector<std::string>* parse = Stringutil::parseString2List(
 				currentstate->params, "|");
 		currentstate->time = atoi((*parse)[1].c_str());
 		currentstate->counter = 0;
@@ -172,7 +172,7 @@ int PersonSM::upperTime(stateargs_t* currentstate) {
 
 int PersonSM::lowerTime(stateargs_t* currentstate) {
 	if (currentstate->stateentry) {
-		std::vector<std::string>* parse = parseString2List(
+		std::vector<std::string>* parse = Stringutil::parseString2List(
 				currentstate->params, "|");
 		currentstate->time = atoi((*parse)[0].c_str());
 		currentstate->counter = 0;
@@ -206,7 +206,7 @@ int PersonSM::delay(stateargs_t* currentstate) {
 int PersonSM::choice(stateargs_t* currentstate) {
 	if (currentstate->stateentry) {
 		if (currentstate->stateentry) {
-			std::vector<std::string>* parse = parseString2List(
+			std::vector<std::string>* parse = Stringutil::parseString2List(
 					currentstate->params, "|");
 			int pct = atoi((*parse)[0].c_str());
 			// choose random between 0 and 100

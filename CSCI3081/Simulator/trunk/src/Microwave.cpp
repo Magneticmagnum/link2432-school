@@ -73,7 +73,7 @@ bool Microwave::isRunning() {
 
 void Microwave::activate(std::string args) {
 	running_ = true;
-	std::vector<std::string> *parse = parseString2List(args, ",");
+	std::vector<std::string> *parse = Stringutil::parseString2List(args, ",");
 	if ((*parse)[0] == "") {
 		runTimeLeft_ = r_();
 	} else {
