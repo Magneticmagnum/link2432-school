@@ -18,6 +18,8 @@ public:
 		ConfigFile cfg = ConfigFile("model-spec.txt");
 		TS_ASSERT(cfg.getProps("Dishwasher")->size() != 0);
 		TS_ASSERT(cfg.getPropsMap().size() != 0);
+		TS_ASSERT(cfg.begin() == cfg.modelprops_.begin());
+		TS_ASSERT(cfg.end() == cfg.modelprops_.end());
 	}
 
 };

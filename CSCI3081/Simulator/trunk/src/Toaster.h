@@ -49,8 +49,9 @@ public:
 
 	/** activate:
 	 * Activates the Toaster.
+	 * Parameter args is inherited from superclass. Unused for Toaster.
 	 */
-	void activate();
+	void activate(std::string args);
 
 	friend class ToasterTest;
 

@@ -39,9 +39,10 @@ public:
 	bool isRunning();
 
 	/** activate:
-	 * Activates the HairDryer on "high" if parameter is true, on "low" otherwise.
+	 * Activates the HairDryer on level ("high" or "low") specified in args.
+	 * If args is empty string, defaults to level "high".
 	 */
-	void activate(bool high);
+	void activate(std::string args);
 
 	/** deactivate:
 	 * Deactivates the HairDryer.

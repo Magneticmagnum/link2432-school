@@ -39,14 +39,9 @@ public:
 	bool isRunning();
 
 	/** activate:
-	 * Activates the Television.
+	 * Turns Television on if args is "on", and off if args is "off".
 	 */
-	void activate();
-
-	/** deactivate:
-	 * Deactivates the Television.
-	 */
-	void deactivate();
+	void activate(std::string args);
 
 	friend class TelevisionTest;
 

@@ -1,3 +1,5 @@
+#ifndef STRINGUTIL_H_
+#define STRINGUTIL_H_
 /*
  * Stringutil.h
  *
@@ -5,16 +7,15 @@
  *      Author: Joe Houlton
  */
 
-#ifndef STRINGUTIL_H_
-#define STRINGUTIL_H_
-
 #include <string>
 #include <vector>
 
-	// Parses a string into a vector with seperator sep
-	// "this-is-a-test" "-"
-	// [this, is, a, test]
+// Parses a string into a vector with seperator sep
+// "this-is-a-test" "-"
+// [this, is, a, test]
+#define MAX_LEN 1023
 
-std::vector<std::string>* parseString2List(std::string &str,
-			const char* sep);
+// Need this because it's a template return?  Not sure really
+extern std::vector<std::string>* parseString(std::string &str, const char* sep);
+
 #endif /* STRINGUTIL_H_ */

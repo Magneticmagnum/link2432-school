@@ -8,7 +8,6 @@
 #ifndef WATERHEATER_H_
 #define WATERHEATER_H_
 
-
 #include "Model.h"
 #include <iostream>
 
@@ -71,6 +70,12 @@ public:
 	 */
 	bool isRunning();
 
+	/** activate:
+	 * Can be used by PersonSM to draw water.
+	 * Comma-delimited args are parsed into quantity and temperature.
+	 */
+	void activate(std::string args);
+
 	friend class WaterHeaterTest;
 
 private:
@@ -78,6 +83,9 @@ private:
 	double powerOff_;
 	double powerOn_;
 	bool running_;
+	bool drawing_;
+	double drawTemp_;
+	double drawAmt_;
 	double temperature_;
 	int ticks_;
 

@@ -1,2 +1,45 @@
-name-sleep next-wakeUp type-delay parameters-90
-name-wakeUp next-gettingReady type-delay parameters-10
+name-BEGIN next-sleeping type-delay parameters-0
+name-sleeping next-unpredictablewaking type-timedWait parameters-390
+name-unpredictablewaking next-waking type-randomTime parameters-0|30
+name-waking next-showerdecision type-delay parameters-5
+name-showerdecision type-choice parameters-50|showeryes|showerno
+name-showeryes type-activate parameters-WaterHeater:on,8,40
+name-showering next-showerfinish type-randomTime parameters-5|10
+name-turnoffshower next-showerfinish type-activate parameters-WaterHeater:off
+name-showerfinish next-dryhair type-delay parameters-15
+name-dryhair next-makecoffee type-activate parameters-HairDryer::high
+name-showerno next-makecoffee type-delay parameters-15
+name-makecoffee next-boilwater type-activate parameters-Stove:3,4,0,0,0,0,0,0
+name-boilwater next-toast type-waitOnTarget parameters-Stove
+name-toast next-maketoast type-activate parameters-Toaster
+name-maketoast next-choosestoveormw type-waitOnTarget parameters-Toaster
+name-choosestoveormw type-choice parameters-50|choosestove|choosemw
+name-choosestove next-usestove type-activate parameters-Stove:2,5,0,0,0,0,0,0
+name-choosemw next-usemw type-activate parameters-Microwave:320
+name-usemw next-leavehouse type-waitOnTarget parameters-Microwave
+name-usestove next-leavehouse type-waitOnTarget parameters-Stove
+name-leavehouse next-arrivechoice type-timedWait parameters-1050
+name-arrivechoice next-gethome type-randomTime parameters-0|60
+name-gethome type-earlierTimeChoice parameters-1080|longdinner|fastdinner
+name-longdinner next-maybeoven type-activate parameters-Stove:3,15,2,20,1,30,0,0
+name-fastdinner next-mw1 type-activate parameters-Microwave:210
+name-mw1 next-endmw1 type-waitOnTarget parameters-Microwave
+name-endmw1 next-mw2 type-activate parameters-Microwave:210
+name-mw2 next-endmw2 type-waitOnTarget parameters-Microwave
+name-endmw2 next-mw3 type-activate parameters-Microwave:210
+name-mw3 next-precleanup type-waitOnTarget parameters-Microwave
+name-maybeoven type-choice parameters-20|useoven|dontuseoven
+name-useoven next-cookwithoven type-activate parameters-Oven:40
+name-waitondinner next-precleanup type-waitOnTarget parameters-Stove
+name-precleanup next-cleanupdinner type-delay parameters-20
+name-cleanupdinner type-dataChoice parameters-Dishwasher|3|usedw|finishdinner
+name-usedw next-finishdinner type-activate parameters-Dishwasher
+name-finishdinner type-choice parameters-20|drawbath|nobath
+name-drawbath next-fillbath type-activate parameters-WaterHeater:on,25,42
+name-fillbath next-turnoffbath type-delay parameters-4
+name-turnoffbath next-soak type-activate parameters-WaterHeater:off
+name-soak next-vegout type-randomTime parameters-15|20
+name-vegout next-vegging type-activate parameters-Xbox:on
+name-vegging next-goingtobed type-timedWait parameters-1380
+name-goingtobed next-layingdown type-randomTime parameters-0|30
+name-layingdown next-sleeping type-activate parameters-Television:off

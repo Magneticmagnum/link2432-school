@@ -39,7 +39,7 @@ public:
 		oven.tick();
 		TS_ASSERT_EQUALS(oven.getTicks(), 0);
 		// Check that oven uses 7.5 kW power for 10 minutes when activated, and then 2.5 kW power for another 30 minutes
-		oven.activate(30);
+		oven.activate("30");
 		oven.tick();
 		TS_ASSERT_EQUALS(oven.getTicks(), 1);
 		TS_ASSERT_EQUALS(oven.getPower(), 7.5);
@@ -67,7 +67,7 @@ public:
 	void test_oven_getEnergy() {
 		Oven oven;
 		oven.tick();
-		oven.activate(30);
+		oven.activate("30");
 		for (int i = 0; i < 40; i++) { // run oven's 40 minute cycle
 			oven.tick();
 		}

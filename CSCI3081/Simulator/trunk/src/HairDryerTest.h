@@ -35,13 +35,13 @@ public:
 		hd.tick();
 		TS_ASSERT_EQUALS(hd.getPower(), 0);
 		// Check that turning HairDryer on updates power usage & running state
-		hd.activate(true);
+		hd.activate("high");
 		hd.tick();
 		TS_ASSERT_EQUALS(hd.isRunning(), true);
 		TS_ASSERT_EQUALS(hd.getPower(), 1.0);
 		hd.tick();
 		TS_ASSERT_EQUALS(hd.getPower(), 1.0);
-		hd.activate(false);
+		hd.activate("low");
 		hd.tick();
 		TS_ASSERT_EQUALS(hd.isRunning(), true);
 		TS_ASSERT_EQUALS(hd.getPower(), 0.5);
@@ -60,9 +60,9 @@ public:
 	void test_hairDryer_getEnergy() {
 		HairDryer hd;
 		hd.tick();
-		hd.activate(true);
+		hd.activate("high");
 		hd.tick();
-		hd.activate(false);
+		hd.activate("low");
 		hd.tick();
 		hd.deactivate();
 		hd.tick();

@@ -9,6 +9,8 @@
 #include "Scheduler.h"
 #include "Model.h"
 #include "Dishwasher.h"
+#include "Clock.h"
+#include "WaterHeater.h"
 
 using namespace std;
 
@@ -26,6 +28,7 @@ public:
 		TS_ASSERT_EQUALS(dw.getPower(), 0.004);
 		TS_ASSERT_EQUALS(dw.getName(), "DefaultDishwasher");
 		TS_ASSERT_EQUALS(dw.stateChanged_, true);
+		TS_ASSERT_EQUALS(dw.getData(), 0);
 	}
 
 	/** test_dishwasher_tick:
@@ -36,10 +39,15 @@ public:
 	 * first 20 minutes of that cycle.
 	 */
 	void test_dishwasher_tick() {
+		Scheduler sched;
 		Dishwasher dw;
 		WaterHeater wh;
 		House *ptr = House::getInstance();
+		Clock *c = new Clock();
+		ptr->putModel(std::string("Clock"), c);
 		ptr->putModel("WaterHeater", &wh);
+		Clock* clk = (Clock*) (ptr->getModel("Clock"));
+		clk->registerScheduler(&sched);
 		WaterHeater *wh1 = dynamic_cast<WaterHeater *>(ptr->getModel("WaterHeater"));
 
 		// Check that dishwasher starts out at 0 ticks and off.
@@ -59,7 +67,7 @@ public:
 		TS_ASSERT_EQUALS(wh1->getTemperature(), 50);
 
 		// Check that activating Dishwasher adjusts state & power usage.
-		dw.activate();
+		dw.activate("");
 
 		// Check that mock WaterHeater temperature starts at 50
 		TS_ASSERT_EQUALS(wh1->getTemperature(), 50);
@@ -107,14 +115,19 @@ public:
 	 * Tests that the Dishwasher energy is correctly updated.
 	 */
 	void test_dishwasher_getEnergy() {
+		Scheduler sched;
 		Dishwasher dw;
 		WaterHeater wh;
 		House *ptr = House::getInstance();
+		Clock *c = new Clock();
+		ptr->putModel(std::string("Clock"), c);
 		ptr->putModel("WaterHeater", &wh);
+		Clock* clk = (Clock*) (ptr->getModel("Clock"));
+		clk->registerScheduler(&sched);
 		dw.tick();
 		dw.tick();
 		TS_ASSERT_EQUALS(dw.getEnergy(), (2*0.004)/60);
-		dw.activate();
+		dw.activate("");
 		for (int i = 0; i < 45; i++) { // run dishwasher's 45 minute cycle
 			dw.tick();
 		}

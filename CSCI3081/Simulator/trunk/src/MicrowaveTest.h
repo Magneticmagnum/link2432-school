@@ -80,7 +80,15 @@ public:
 		mw.tick();
 		TS_ASSERT_EQUALS(mw.getTicks(), 0);
 		TS_ASSERT_EQUALS(mw.getPower(), 0);
-}
+
+		// Test that MW sets notification
+		mw.activate("120");
+		TS_ASSERT_EQUALS(mw.notifyStateChanged_, true);
+		mw.tick();
+		TS_ASSERT_EQUALS(mw.notifyStateChanged_, false);
+		mw.tick();
+		TS_ASSERT_EQUALS(mw.notifyStateChanged_, true);
+	}
 
 	/** test_microwave_getEnergy:
 	 * Tests that the Microwave energy is correctly updated.

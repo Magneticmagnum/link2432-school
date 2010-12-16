@@ -6,6 +6,7 @@
  */
 
 #include "Stove.h"
+#include "Stringutil.h"
 
 Stove::Stove() {
 	powerOn_ = 1.4;
@@ -35,6 +36,7 @@ void Stove::configure(PropertyTable* props) {
 }
 
 void Stove::tick() {
+	Model::tick();
 	logPower();
 	energy_ += getPower();
 	if (running_) {
@@ -48,14 +50,16 @@ void Stove::tick() {
 				} else {
 					burners_[i] = 0;
 					stateChanged_ = true;
+					notifyStateChanged_ = true;
 					logBurners();
 				}
 			}
 			sum += burners_[i];
 		}
-		if (sum = 0) {
+		if (sum == 0) {
 			running_ = false;
 			stateChanged_ = true;
+			notifyStateChanged_ = true;
 			logOff();
 		}
 	} else {
@@ -91,36 +95,42 @@ bool Stove::isRunning() {
 	return running_;
 }
 
-void Stove::activate(int b1, int c1, int b2, int c2, int b3, int c3, int b4,int c4) {
-	// Store each burner's power level in an int array
-	burners_[0] = b1;
-	burners_[1] = b2;
-	burners_[2] = b3;
-	burners_[3] = b4;
-	cookTime_[0] = c1;
-	cookTime_[1] = c2;
-	cookTime_[2] = c3;
-	cookTime_[3] = c4;
-	running_ = true;
-	stateChanged_ = true;
-}
-
-void Stove::deactivate() {
-	burners_[0] = 0;
-	burners_[1] = 0;
-	burners_[2] = 0;
-	burners_[3] = 0;
-	cookTime_[0] = 0;
-	cookTime_[1] = 0;
-	cookTime_[2] = 0;
-	cookTime_[3] = 0;
+void Stove::activate(std::string args) {
+	std::vector<std::string> *parse = parseString(args, ",");
+	int i;
+	int size = parse->size();
+	// Exit if incorrect # of args - must have 4 pairs of (heat level, duration)
+	if (size != 8) {
+		LoggerPtr log(Logger::getLogger("Stove"));
+		LOG4CXX_ERROR(
+				log,
+				getName()
+						<< " :: Incorrect number of arguments in string passed to activate(std::string args). Need 8 args - 4 (heat level, duration) pairs.");
+		return;
+	}
 	running_ = false;
+	std::string str1;
+	for (i = 0; i < size; i++) {
+		str1 = (*parse)[i];
+		if ((i % 2) == 0) {
+			std::string str2 = (*parse)[i + 1];
+			burners_[i / 2] = atoi(str1.c_str());
+			cookTime_[i / 2] = atoi(str2.c_str());
+			if ((str1 != "0") && (str2 != "0")) {
+				running_ = true;
+			}
+		}
+	}
 	stateChanged_ = true;
+	notifyStateChanged_ = true;
+	delete parse;
 }
 
 void Stove::logBurners() {
 	if (stateChanged_ == true) {
 		LoggerPtr log(Logger::getLogger("Stove"));
-		LOG4CXX_INFO(log, getName() << " :: Burner 1: " << burners_[0] << ", Burner 2: " << burners_[1] << ", Burner 3: " << burners_[2] << ", Burner 4: " << burners_[3]);
+		LOG4CXX_INFO(log, getName() << " :: Burner 1: " << burners_[0]
+				<< ", Burner 2: " << burners_[1] << ", Burner 3: "
+				<< burners_[2] << ", Burner 4: " << burners_[3]);
 	}
 }

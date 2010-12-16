@@ -21,6 +21,7 @@ public:
 		Model model;
 		TS_ASSERT_EQUALS(model.getEnergy(), 0);
 		TS_ASSERT_EQUALS(model.getPower(), 0);
+		TS_ASSERT_EQUALS(model.getStateChanged(), model.stateChanged_);
 	}
 
 	/** test_model_name:
@@ -40,6 +41,7 @@ public:
 		Scheduler sched;
 		Model model;
 		model.tick();
+		model.activate("");
 	}
 
 	/** test_model_setScheduler:

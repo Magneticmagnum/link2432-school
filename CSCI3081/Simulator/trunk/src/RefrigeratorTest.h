@@ -42,12 +42,11 @@ public:
 		fridge.tick();
 		if (initTicks < 9) {
 			TS_ASSERT_EQUALS(fridge.getTicks(), initTicks+1);
-		}
-		else {
+		} else {
 			TS_ASSERT_EQUALS(fridge.getTicks(), 0);
 		}
 		// Check that cycle updates correctly when a Person is cooking.
-		fridge.setCookingState(true);
+		fridge.activate("on");
 		TS_ASSERT_EQUALS(fridge.getCookingState(), true);
 		TS_ASSERT_EQUALS(fridge.getTicks(), 0);
 		TS_ASSERT_EQUALS(fridge.isRunning(), true);
@@ -77,7 +76,7 @@ public:
 		TS_ASSERT_EQUALS(fridge.isRunning(), true);
 		TS_ASSERT_EQUALS(fridge.getPower(), 0.3);
 		// Check that cycle updates correctly when nobody is cooking.
-		fridge.setCookingState(false);
+		fridge.activate("off");
 		TS_ASSERT_EQUALS(fridge.getCookingState(), false);
 		TS_ASSERT_EQUALS(fridge.getTicks(), 0);
 		TS_ASSERT_EQUALS(fridge.isRunning(), true);
@@ -129,14 +128,14 @@ public:
 	 */
 	void test_refrigerator_getEnergy() {
 		Refrigerator fridge;
-		fridge.setCookingState(true);
+		fridge.activate("on");
 		fridge.tick(); // on
 		fridge.tick();
 		fridge.tick();
 		fridge.tick(); // off
 		fridge.tick();
 		fridge.tick();
-		fridge.setCookingState(false);
+		fridge.activate("off");
 		fridge.tick(); // on
 		fridge.tick();
 		fridge.tick();
@@ -185,7 +184,8 @@ public:
 	 */
 	void test_refrigerator_cast() {
 		Refrigerator fridge;
-		cout << endl << "test_refrigerator_cast(): int = " << (int)fridge << ", double = " << (double)fridge << endl;
+		cout << endl << "test_refrigerator_cast(): int = " << (int) fridge
+				<< ", double = " << (double) fridge << endl;
 		// Compare (int)fridge with 0
 		TS_ASSERT_EQUALS((int)fridge, 0);
 	}

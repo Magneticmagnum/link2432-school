@@ -29,19 +29,23 @@ void Toaster::configure(PropertyTable* props) {
 }
 
 void Toaster::tick() {
+	Model::tick();
 	logPower();
 	if (running_) {
 		logOn();
 		if (ticks_ < 2) {
 			ticks_++;
+			stateChanged_ = false;
 		} else {
 			running_ = false;
 			stateChanged_ = true;
+			notifyStateChanged_ = true;
 			logOff();
 			ticks_ = 0;
 		}
 	} else {
 		logOff();
+		stateChanged_ = false;
 	}
 	energy_ += getPower();
 }
@@ -49,8 +53,7 @@ void Toaster::tick() {
 double Toaster::getPower() {
 	if (running_) {
 		power_ = powerOn_;
-	}
-	else {
+	} else {
 		power_ = powerOff_;
 	}
 	return power_;
@@ -64,7 +67,8 @@ bool Toaster::isRunning() {
 	return running_;
 }
 
-void Toaster::activate() {
+void Toaster::activate(std::string args) {
 	running_ = true;
 	stateChanged_ = true;
+	notifyStateChanged_ = true;
 }

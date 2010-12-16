@@ -13,9 +13,9 @@ LFLAGS = $(CPPFLAGS) -llog4cxx -lapr-1 -laprutil-1
 .cpp.o :
 	$(CPP) $(CPPFLAGS) -c -ggdb3 $<
 
-TESTS = ModelTest.h ConfigFileTest.h HouseTest.h SchedulerTest.h RandomIntTest.h RefrigeratorTest.h WaterHeaterTest.h ToasterTest.h OvenTest.h MicrowaveTest.h DishwasherTest.h TelevisionTest.h StoveTest.h HairDryerTest.h XboxTest.h
-SOURCES = Model.cpp House.cpp Scheduler.cpp RandomInt.cpp Refrigerator.cpp WaterHeater.cpp Toaster.cpp Oven.cpp Microwave.cpp Dishwasher.cpp Television.cpp Stove.cpp HairDryer.cpp Xbox.cpp ConfigFile.cpp PersonSM.cpp
-OBJS = Model.o House.o Scheduler.o RandomInt.o Refrigerator.o WaterHeater.o Toaster.o Oven.o Microwave.o Dishwasher.o Television.o Stove.o HairDryer.o Xbox.o ConfigFile.o PersonSM.o
+TESTS = ModelTest.h ConfigFileTest.h HouseTest.h SchedulerTest.h RandomIntTest.h ClockTest.h RefrigeratorTest.h WaterHeaterTest.h ToasterTest.h OvenTest.h MicrowaveTest.h DishwasherTest.h TelevisionTest.h StoveTest.h HairDryerTest.h XboxTest.h PersonSMTest.h
+SOURCES = Model.cpp House.cpp Scheduler.cpp RandomInt.cpp Refrigerator.cpp WaterHeater.cpp Toaster.cpp Oven.cpp Microwave.cpp Dishwasher.cpp Television.cpp Stove.cpp HairDryer.cpp Xbox.cpp ConfigFile.cpp Clock.cpp PersonSM.cpp Stringutil.cpp
+OBJS = Model.o House.o Scheduler.o RandomInt.o Refrigerator.o WaterHeater.o Toaster.o Oven.o Microwave.o Dishwasher.o Television.o Stove.o HairDryer.o Xbox.o ConfigFile.o Clock.o PersonSM.o Stringutil.o
 
 # Build object files
 Model.o: Model.cpp Model.h
@@ -33,12 +33,13 @@ Xbox.o: Xbox.cpp Xbox.h
 PersonSM.o: PersonSM.cpp PersonSM.h
 RandomInt.o: RandomInt.cpp RandomInt.h
 House.o: House.cpp House.h
+Clock.o: Clock.cpp Clock.h
 ConfigFile.o: ConfigFile.cpp ConfigFile.h
+Stringutil.o: Stringutil.cpp Stringutil.h
 simulator.o: simulator.cpp
 
 # all: (default target) builds the executable, runs the tests, and generates the documentation.
-#all: doc run-tests test-coverage simulator clean
-all: run-tests test-coverage simulator clean
+all: doc run-tests test-coverage simulator clean
 
 # simulator: builds executable program.
 simulator: simulator.o $(OBJS)

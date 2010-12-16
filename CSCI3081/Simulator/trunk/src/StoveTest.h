@@ -34,17 +34,22 @@ public:
 		stove.tick();
 		TS_ASSERT_EQUALS(stove.getPower(), 0);
 		// Check that turning stove on updates power usage & running state.
-		stove.activate(3, 5, 2, 5, 0, 5, 1, 5);
+		stove.activate("3,5,2,5,0,5,1,5");
 		stove.tick();
 		TS_ASSERT_EQUALS(stove.isRunning(), true);
 		TS_ASSERT_EQUALS(stove.getPower(), (1.4 + 1.4*0.5 + 1.4*0.25));
 		stove.tick();
 		TS_ASSERT_EQUALS(stove.getPower(), (1.4 + 1.4*0.5 + 1.4*0.25));
 		// Check that turning stove off updates power usage & running state
-		stove.deactivate();
+		stove.activate("0,0,0,0,0,0,0,0");
 		stove.tick();
 		TS_ASSERT_EQUALS(stove.isRunning(), false);
 		TS_ASSERT_EQUALS(stove.getPower(), 0);
+		// test that a notification is set and cleared
+		stove.activate("3,1,0,0,0,0,0,0");
+		TS_ASSERT_EQUALS(stove.notifyStateChanged_, true);
+		stove.tick();
+		TS_ASSERT_EQUALS(stove.notifyStateChanged_, false);
 	}
 
 	/** test_stove_getEnergy:
@@ -53,11 +58,11 @@ public:
 	void test_stove_getEnergy() {
 		Stove stove;
 		stove.tick();
-		stove.activate(3, 5, 2, 5, 0, 5, 1, 5);
+		stove.activate("3,5,2,5,0,5,1,5");
 		stove.tick();
 		stove.tick();
 		stove.tick();
-		stove.deactivate();
+		stove.activate("0,0,0,0,0,0,0,0");
 		stove.tick();
 		TS_ASSERT_DELTA(stove.getEnergy(), (3*(1.4 + 1.4*0.5 + 1.4*0.25))/60, 1e-6);
 	}
@@ -83,7 +88,7 @@ public:
 	void test_stove_shift() {
 		// Stream put out the name (using std:ostream&), current power draw, and total energy use.
 		Stove stove;
-		cout << endl << "test_stove_shift(): "  << stove;
+		cout << endl << "test_stove_shift(): " << stove;
 	}
 
 	/** test_stove_cast:
@@ -91,7 +96,8 @@ public:
 	 */
 	void test_stove_cast() {
 		Stove stove;
-		cout << endl << "test_stove_cast(): int = " << (int)stove << ", double = " << (double)stove << endl;
+		cout << endl << "test_stove_cast(): int = " << (int) stove
+				<< ", double = " << (double) stove << endl;
 		// Compare (int)stove with 0
 		TS_ASSERT_EQUALS((int)stove, 0);
 	}

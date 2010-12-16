@@ -29,8 +29,8 @@ public:
 		Refrigerator fridge1 = Refrigerator();
 		Refrigerator fridge2 = Refrigerator();
 		// Check that registering models returns true
-		TS_ASSERT(sched.registerModel(fridge1) == true);
-		TS_ASSERT(sched.registerModel(fridge2) == true);
+		TS_ASSERT(sched.registerModel(&fridge1) == true);
+		TS_ASSERT(sched.registerModel(&fridge2) == true);
 		// Check that fridge1 and fridge2 have been added to models
 		TS_ASSERT(sched.getModels().at(0) == &fridge1);
 		TS_ASSERT(sched.getModels().at(1) == &fridge2);
@@ -58,6 +58,8 @@ public:
 		TS_ASSERT_EQUALS(sched.getMinute(), 10);
 		TS_ASSERT_EQUALS(sched.getHours(), 0);
 		TS_ASSERT_EQUALS(sched.getDay(), 0);
+		TS_ASSERT_EQUALS(sched.getMinutesSinceMidnight(), 10);
+		TS_ASSERT(sched.getFormattedTime() == "Day: 0, Time: 00:10");
 	}
 
 };

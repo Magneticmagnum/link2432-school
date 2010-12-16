@@ -29,6 +29,7 @@ void Xbox::configure(PropertyTable* props) {
 }
 
 void Xbox::tick() {
+	Model::tick();
 	logPower();
 	energy_ += getPower();
 	if (running_) {
@@ -51,12 +52,12 @@ bool Xbox::isRunning() {
 	return running_;
 }
 
-void Xbox::activate() {
-	running_ = true;
+void Xbox::activate(std::string args) {
+	if (args == "on") {
+		running_ = true;
+	} else if (args == "off") {
+		running_ = false;
+	}
 	stateChanged_ = true;
-}
-
-void Xbox::deactivate() {
-	running_ = false;
-	stateChanged_ = true;
+	notifyStateChanged_ = true;
 }

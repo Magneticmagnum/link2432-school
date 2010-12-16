@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <stdio.h>
 #include "Scheduler.h"
 #include "Refrigerator.h"
 #include "WaterHeater.h"
@@ -19,6 +20,7 @@
 #include "Xbox.h"
 #include "House.h"
 #include "PersonSM.h"
+#include "Clock.h"
 #include "ConfigFile.h"
 
 #include <log4cxx/logger.h>
@@ -31,6 +33,11 @@ using log4cxx::File;
 
 int main(int argc, char *argv[]) {
 
+	if (argc != 3) {
+		printf("Usage: %s <model-spec-file.txt> <person-spec-file.txt>",
+				argv[0]);
+		return 0;
+	}
 	// Set up the logger.
 	LoggerPtr log(Logger::getLogger("Main"));
 	PropertyConfigurator::configure(File("log.config"));
@@ -51,15 +58,23 @@ int main(int argc, char *argv[]) {
 	house->registerModelFactory("WaterHeater", &construct<WaterHeater> );
 	house->registerModelFactory("Xbox", &construct<Xbox> );
 	house->registerModelFactory("PersonSM", &construct<PersonSM> );
+	house->registerModelFactory("Clock", &construct<Clock> );
 
 	// Load config file, configure Models, and register Models with Scheduler.
 	Scheduler sched;
+	std::cout << "Scheduler created" << std::endl;
 	house->loadConfig(argv[1], sched);
+	std::cout << "Loaded house config file" << std::endl;
 	PersonSM* johndoe = (PersonSM*) (house->getModel("JohnDoe"));
 	johndoe->loadStateFile(argv[2]);
+	Clock* clock = (Clock*) (house->getModel("Clock"));
+	clock->registerScheduler(&sched);
+	std::cout << "Loaded state file" << std::endl;
 
 	// Call the Scheduler's run() method, wait for it to complete.
-	sched.run(4320);
+	std::cout << "Running scheduler ticks" << std::endl;
+	int simTime = 3 * 1440; // run for 3 days
+	sched.run(simTime);
 
 	// Exit simulator.
 	LOG4CXX_INFO(log, "Simulator exited. Log file closed.");

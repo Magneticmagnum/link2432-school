@@ -6,9 +6,12 @@
  */
 
 #include "ConfigFile.h"
+#include "Stringutil.h"
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <string.h>
+#include <stdlib.h>
 #include <map>
 #include <vector>
 
@@ -22,40 +25,45 @@ ConfigFile::ConfigFile(std::string path) {
 	ifstream ifs;
 	ifs.open(path.c_str());
 	string line;
+	// use a holder for c_str
+	char *cstr = (char*) malloc(MAX_LEN);
 	while (getline(ifs, line, '\n')) {
-		// read file in
-		vector<string> parsed;
-		// parse2vector by space char
-		int ind = 0;
 		PropertyTable *pair = new PropertyTable;
-		while (ind >= 0) {
-			// presume first field is name (requirement)
-			int firstSpace = line.find(" ");
-			int firstHyphen = line.find("-");
-			string first = line.substr(0, firstHyphen);
-			string second = line.substr(firstHyphen + 1, firstSpace
-					- firstHyphen - 1);
-			cout << "Loading config property pair (" << first << ", " << second << ")" << endl;
-			LOG4CXX_INFO(log, "Loading config property pair (" << first << ", " << second << ")");
-			// ex. name Microwave
-			pair->insert(make_pair(first, second));
-			if (first == "name") {
-				// insert pair into map with name field
-				modelprops_.insert(make_pair(second, pair));
-
+		vector<string> *parsed = parseString(line, " ");
+		std::vector<string>::iterator begin = parsed->begin();
+		std::vector<string>::iterator end = parsed->end();
+		while (begin != end) {
+			strncpy(cstr, (*begin).c_str(), MAX_LEN);
+			char *first, *second = NULL;
+			first = strtok(cstr, "-");
+			second = strtok(NULL, "-");
+			if (first != NULL && second != NULL) {
+				if (strcmp(first, "name") == 0) {
+					// if it's the name, add it to the modelprops_ map
+					modelprops_[second] = pair;
+				}
+				int seclen = strlen(second);
+				// stupid line feeds...
+				if (second[seclen] == '\r' || second[seclen] == '\n')
+					second[seclen] = '\0';
+				LOG4CXX_INFO(log, "Loading config property pair (" << string(
+						first) << ", " << string(second) << ")");
+				// add name-value entry to the property map (table)
+				(*pair)[first] = string(second);
 			}
-			// slice out parsed part
-			line = line.substr(firstSpace + 1, line.size() - firstSpace - 1);
-			ind = firstSpace;
+			begin++;
 		}
+		delete parsed;
 	}
+	delete[] cstr;
+	ifs.close();
 	cout << "Finished loading configuration file." << endl;
 	LOG4CXX_INFO(log, "Finished loading configuration file.");
 }
-map<string, PropertyTable* >::iterator ConfigFile::begin() {
+map<string, PropertyTable*>::iterator ConfigFile::begin() {
 	return modelprops_.begin();
 }
-map<string, PropertyTable* >::iterator ConfigFile::end() {
+map<string, PropertyTable*>::iterator ConfigFile::end() {
 	return modelprops_.end();
 }
 
@@ -69,10 +77,10 @@ ConfigFile::~ConfigFile() {
 	}
 }
 
-PropertyTable* ConfigFile::getProps(string model) {
-	return modelprops_[model];
+PropertyTable* ConfigFile::getProps(std::string modelName) {
+	return modelprops_[modelName];
 }
 
-std::map<std::string, PropertyTable *> ConfigFile::getPropsMap() {
+std::map<std::string, PropertyTable *> &ConfigFile::getPropsMap() {
 	return modelprops_;
 }

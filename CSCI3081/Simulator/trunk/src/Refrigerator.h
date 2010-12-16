@@ -63,10 +63,12 @@ public:
 	 */
 	bool getCookingState();
 
-	/** setCooking State:
-	 * Sets the cooking state as far as Refrigerator knows.
+	/** activate:
+	 * Updates the Refrigerator's duty cycle state to cooking or not cooking based on args.
+	 * In order to start "cooking" duty cycle, args must be "1".
+	 * In order to start "not cooking" duty cycle, args must be "0".
 	 */
-	bool setCookingState(bool state);
+	void activate(std::string args);
 
 	friend class RefrigeratorTest;
 

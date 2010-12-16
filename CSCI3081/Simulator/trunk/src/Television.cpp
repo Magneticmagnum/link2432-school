@@ -30,6 +30,7 @@ void Television::configure(PropertyTable* props) {
 }
 
 void Television::tick() {
+	Model::tick();
 	logPower();
 	energy_ += getPower();
 	if (running_) {
@@ -52,12 +53,11 @@ bool Television::isRunning() {
 	return running_;
 }
 
-void Television::activate() {
-	running_ = true;
-	stateChanged_ = true;
-}
-
-void Television::deactivate() {
-	running_ = false;
+void Television::activate(std::string args) {
+	if (args == "on") {
+		running_ = true;
+	} else if (args == "off") {
+		running_ = false;
+	}
 	stateChanged_ = true;
 }

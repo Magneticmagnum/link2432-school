@@ -45,22 +45,12 @@ public:
 	bool isRunning();
 
 	/** activate:
-	 * Activates the Stove by taking the following parameters:
-	 * @param b1 : heat level for burner 1 (0=off, 1=low, 2=med, 3=high)
-	 * @param b2 : heat level for burner 2 (0=off, 1=low, 2=med, 3=high)
-	 * @param b3 : heat level for burner 3 (0=off, 1=low, 2=med, 3=high)
-	 * @param b4 : heat level for burner 4 (0=off, 1=low, 2=med, 3=high)
-	 * @param c1 : time to use burner 1 at level b1
-	 * @param c2 : time to use burner 2 at level b2
-	 * @param c3 : time to use burner 3 at level b3
-	 * @param c4 : time to use burner 4 at level b4
+	 * Activates the Stove by processing args.
+	 * @param args : comma-delim. string burner,heat,duration,burner,heat,duration...
+	 * where bx is heat level for burner x (	 * In order to start cooking, args must be "1".
+	 * ), and cx is time to use burner x at levent bx.
 	 */
-	void activate(int b1, int c1, int b2, int c2, int b3, int c3, int b4, int c4);
-
-	/** deactivate:
-	 * Deactivates the Stove.
-	 */
-	void deactivate();
+	void activate(std::string args);
 
 	/** logBurners:
 	 * When burners are turned on or off, write INFO message to log giving the heat level of each burner.

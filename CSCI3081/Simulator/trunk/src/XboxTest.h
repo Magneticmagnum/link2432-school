@@ -33,14 +33,14 @@ public:
 		xbox.tick();
 		TS_ASSERT_EQUALS(xbox.getPower(), 0.002);
 		// Check that turning Xbox on updates power usage & running state
-		xbox.activate();
+		xbox.activate("on");
 		xbox.tick();
 		TS_ASSERT_EQUALS(xbox.isRunning(), true);
 		TS_ASSERT_EQUALS(xbox.getPower(), 0.165);
 		xbox.tick();
 		TS_ASSERT_EQUALS(xbox.getPower(), 0.165);
 		// Check that turning Xbox off updates power usage & running state
-		xbox.deactivate();
+		xbox.activate("off");
 		xbox.tick();
 		TS_ASSERT_EQUALS(xbox.isRunning(), false);
 		TS_ASSERT_EQUALS(xbox.getPower(), 0.002);
@@ -52,9 +52,9 @@ public:
 	void test_xbox_getEnergy() {
 		Xbox xbox;
 		xbox.tick();
-		xbox.activate();
+		xbox.activate("on");
 		xbox.tick();
-		xbox.deactivate();
+		xbox.activate("off");
 		xbox.tick();
 		TS_ASSERT_DELTA(xbox.getEnergy(), (0.002*2 + 0.165)/60, 1e-6);
 	}
