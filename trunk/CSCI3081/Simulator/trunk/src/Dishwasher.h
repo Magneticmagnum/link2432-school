@@ -43,14 +43,17 @@ public:
 	int getTicks();
 
 	/** isRunning:
-	 * Returns boolean indicating if the Oven is running or not.
+	 * Returns boolean indicating if the Dishwasher is running or not.
 	 */
 	bool isRunning();
 
+	// returns days since last ran
+	int getData();
+
 	/** activate:
-	 * Activates the Oven.
+	 * Activates the Dishwasher.
 	 */
-	void activate();
+	void activate(std::string args);
 
 	friend class DishwasherTest;
 
@@ -59,6 +62,8 @@ private:
 	double powerOn_;
 	bool running_;
 	int ticks_;
+	int daysSinceLast_;
+	int currentDay_;
 };
 
 #endif /* DISHWASHER_H_ */

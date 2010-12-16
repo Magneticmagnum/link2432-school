@@ -1,0 +1,1 @@
+name-Xbox type-Xbox powerOn-0.165 powerOff-0.002

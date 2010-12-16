@@ -48,9 +48,10 @@ public:
 	bool isRunning();
 
 	/** activate:
-	 * Activates the Oven for the given duration in minutes (excludes 10-minute preheat).
+	 * Activates the Oven.
+	 * Preheats for 10 min, then switches to baking for duration specified in args.
 	 */
-	void activate(int duration);
+	void activate(std::string args);
 
 	friend class OvenTest;
 

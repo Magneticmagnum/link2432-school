@@ -39,7 +39,7 @@ public:
 		toaster.tick();
 		TS_ASSERT_EQUALS(toaster.getTicks(), 0);
 		// Check that toaster uses power for 2 minutes when activated
-		toaster.activate();
+		toaster.activate("");
 		toaster.tick();
 		TS_ASSERT_EQUALS(toaster.getTicks(), 1);
 		TS_ASSERT_EQUALS(toaster.getPower(), 0.9);
@@ -57,7 +57,7 @@ public:
 	void test_toaster_getEnergy() {
 		Toaster toaster;
 		toaster.tick();
-		toaster.activate();
+		toaster.activate("");
 		toaster.tick();
 		toaster.tick();
 		toaster.tick();

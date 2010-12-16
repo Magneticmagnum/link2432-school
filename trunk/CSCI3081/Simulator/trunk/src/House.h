@@ -30,7 +30,7 @@ class House {
 public:
 
 	/** loadConfig:
-	 * Loads configuration file config, configures models, and registers models with Scheduler sched.
+	 * Loads configuration file config abd configures models.
 	 */
 	void loadConfig(string config, Scheduler &sched);
 
@@ -59,8 +59,6 @@ public:
 	 * Registers a factory with the House.
 	 */
 	void registerModelFactory(std::string type, factory f);
-
-	void loadConfig(std::string cfg);
 
 	/** clear:
 	 * Clears the contents of the internal map.

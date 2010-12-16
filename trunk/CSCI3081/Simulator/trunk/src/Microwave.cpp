@@ -6,12 +6,11 @@
  */
 #include "Microwave.h"
 #include "RandomInt.h"
-#include "Stringutil.h"
 
 Microwave::Microwave() {
 	powerOff_ = 0;
 	powerOn_ = 1.5;
-	r_ = RandomInt(40,120);
+	r_ = RandomInt(40, 120);
 	running_ = false;
 	stateChanged_ = true;
 	scheduler_ = NULL;
@@ -32,6 +31,7 @@ void Microwave::configure(PropertyTable* props) {
 }
 
 void Microwave::tick() {
+	Model::tick();
 	logPower();
 	energy_ += min(60, runTimeLeft_) * getPower();
 	if (running_ == true) {
@@ -45,6 +45,7 @@ void Microwave::tick() {
 			runTimeLeft_ = 0;
 			running_ = false;
 			stateChanged_ = true;
+			notifyStateChanged_ = true;
 			logOff();
 		}
 	} else {
@@ -56,8 +57,7 @@ void Microwave::tick() {
 double Microwave::getPower() {
 	if ((running_ == true) & (runTimeLeft_ != 0)) {
 		power_ = powerOn_;
-	}
-	else {
+	} else {
 		power_ = powerOff_;
 	}
 	return power_;
@@ -73,19 +73,19 @@ bool Microwave::isRunning() {
 
 void Microwave::activate(std::string args) {
 	running_ = true;
-	std::vector<std::string> *parse = Stringutil::parseString2List(args, ",");
-	if ((*parse)[0] == "") {
+	if (args == "") {
 		runTimeLeft_ = r_();
 	} else {
-		runTimeLeft_ = atoi((*parse)[0].c_str());
+		runTimeLeft_ = atoi(args.c_str());
 	}
 	stateChanged_ = true;
-	delete parse;
+	notifyStateChanged_ = true;
 }
 
 void Microwave::logRunTimeLeft() {
 	if (stateChanged_ == true) {
 		LoggerPtr log(Logger::getLogger(getName()));
-		LOG4CXX_INFO(log, getName() << " :: Run time set to: " << runTimeLeft_ << " seconds");
+		LOG4CXX_INFO(log, getName() << " :: Run time set to: " << runTimeLeft_
+				<< " seconds");
 	}
 }

@@ -39,14 +39,9 @@ public:
 	bool isRunning();
 
 	/** activate:
-	 * Activates the Xbox.
+	 * Turns Xbox on if args is "on", and off if args is "off".
 	 */
-	void activate();
-
-	/** deactivate:
-	 * Deactivates the Xbox.
-	 */
-	void deactivate();
+	void activate(std::string args);
 
 	friend class XboxTest;
 

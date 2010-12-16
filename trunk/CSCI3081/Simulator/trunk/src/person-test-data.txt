@@ -1,0 +1,3 @@
+name-datatest type-dataChoice parameters-Dishwasher|1|success|fail
+name-success type-delay parameters-10
+name-fail type-delay parameters-20

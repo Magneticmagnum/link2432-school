@@ -8,6 +8,7 @@
 #include "Scheduler.h"
 #include "Model.h"
 #include <log4cxx/logger.h>
+#include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
@@ -25,14 +26,18 @@ Scheduler::Scheduler() :
 Scheduler::~Scheduler() {
 }
 
-bool Scheduler::registerModel(Model &thing) {
-	models_.push_back(&thing);
-	thing.setScheduler(this);
+bool Scheduler::registerModel(Model *thing) {
+	models_.push_back(thing);
+	thing->setScheduler(this);
 	return true;
 }
 
 int Scheduler::getTime() {
 	return time_;
+}
+
+int Scheduler::getMinutesSinceMidnight() {
+	return time_ % 1440;
 }
 
 int Scheduler::getMinute() {
@@ -50,21 +55,27 @@ int Scheduler::getDay() {
 std::string Scheduler::getFormattedTime() {
 	std::stringstream s_;
 	if ((getMinute() < 10) && (getHours() < 10)) {
-		s_ << "Day: " << getDay() << ", Time: 0" << getHours() << ":0"<< getMinute();
+		s_ << "Day: " << getDay() << ", Time: 0" << getHours() << ":0"
+				<< getMinute();
 	} else if ((getMinute() < 10) && (getHours() >= 10)) {
-		s_ << "Day: " << getDay() << ", Time: " << getHours() << ":0"<< getMinute();
+		s_ << "Day: " << getDay() << ", Time: " << getHours() << ":0"
+				<< getMinute();
 	} else if ((getMinute() >= 10) && (getHours() < 10)) {
-		s_ << "Day: " << getDay() << ", Time: 0" << getHours() << ":"<< getMinute();
+		s_ << "Day: " << getDay() << ", Time: 0" << getHours() << ":"
+				<< getMinute();
 	} else {
-		s_ << "Day: " << getDay() << ", Time: " << getHours() << ":"<< getMinute();
+		s_ << "Day: " << getDay() << ", Time: " << getHours() << ":"
+				<< getMinute();
 	}
 	return s_.str();
 }
 
 void Scheduler::run(int maxCount) {
+	LoggerPtr schedulerLog(Logger::getLogger("Scheduler"));
 	// Loop through ticks until maxCount is reached.
+	LOG4CXX_INFO(schedulerLog, "Scheduler :: run :: " << maxCount << std::endl);
 	for (int i = 0; i < maxCount; i++) {
-		incrementTime();
+		time_++;
 		size_t nModels = models_.size();
 		sumPower_ = 0;
 		// Loop through registered Models, adding a tick for each Model and summing power & energy usage.
@@ -76,15 +87,13 @@ void Scheduler::run(int maxCount) {
 		sumPower_ = sumPower_;
 		sumEnergy_ += sumPower_;
 		// Log current day/time, instantaneous power usage, and cumulative energy usage.
-		LoggerPtr schedulerLog(Logger::getLogger("Scheduler"));
 		LOG4CXX_INFO(schedulerLog, "Scheduler :: " << getFormattedTime());
-		LOG4CXX_INFO(schedulerLog, "Scheduler :: Instantaneous power use: " << fixed << setprecision(4) << getSumPower() << " kW");
-		LOG4CXX_INFO(schedulerLog, "Scheduler :: Cumulative energy use: " << fixed << setprecision(4) << getSumEnergy() << " kWh" << std::endl);
+		LOG4CXX_INFO(schedulerLog, "Scheduler :: Instantaneous power use: "
+				<< fixed << setprecision(4) << getSumPower() << " kW");
+		LOG4CXX_INFO(schedulerLog, "Scheduler :: Cumulative energy use: "
+				<< fixed << setprecision(4) << getSumEnergy() << " kWh"
+				<< std::endl);
 	}
-}
-
-void Scheduler::incrementTime() {
-	time_++;
 }
 
 std::vector<Model*> Scheduler::getModels() {

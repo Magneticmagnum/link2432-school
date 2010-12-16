@@ -9,3 +9,4 @@ name-Toaster type-Toaster powerOn-0.9 powerOff-0
 name-WaterHeater type-WaterHeater capacity-300 powerOn-4.5 powerOff-0
 name-Xbox type-Xbox powerOn-0.165 powerOff-0.002
 name-JohnDoe type-PersonSM
+name-Clock type-Clock

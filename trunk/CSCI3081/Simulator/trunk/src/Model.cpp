@@ -13,6 +13,9 @@ using namespace std;
 Model::Model() {
 	power_ = 0;
 	energy_ = 0;
+	stateChanged_ = true;
+	notifyStateChanged_ = true;
+	scheduler_ = NULL;
 
 }
 
@@ -20,21 +23,25 @@ Model::~Model() {
 }
 
 ostream& operator<<(ostream& os, Model& m) {
-	os << m.getName() << ": power usage = " << m.getPower() << " kW, Energy usage = " << m.getEnergy() << " kWh." << endl;
+	os << m.getName() << ": power usage = " << m.getPower()
+			<< " kW, Energy usage = " << m.getEnergy() << " kWh." << endl;
 	return os;
 }
 
 Model::operator int() {
-	return (int)getEnergy();
+	return (int) getEnergy();
 }
 
 Model::operator double() {
-	return (double)getEnergy();
+	return (double) getEnergy();
 }
 
 void Model::configure(PropertyTable* table) {
 	LoggerPtr log(Logger::getLogger(getName()));
-	LOG4CXX_ERROR(log, getName() << " :: configure() method was called by Model instead of by Model subclass.");
+	LOG4CXX_ERROR(
+			log,
+			getName()
+					<< " :: configure() method was called by Model instead of by Model subclass.");
 }
 
 void Model::setName(std::string &other) {
@@ -55,10 +62,13 @@ double Model::getEnergy() {
 }
 
 void Model::tick() {
-	LoggerPtr log(Logger::getLogger(getName()));
-	LOG4CXX_ERROR(log, getName() << " :: tick() method was called by Model instead of by Model subclass.");
+	if (notifyStateChanged_)
+		notifyStateChanged_ = false;
 }
 
+int Model::getData() {
+	return 0;
+}
 void Model::setScheduler(Scheduler *sched) {
 	scheduler_ = sched;
 }
@@ -71,9 +81,16 @@ bool Model::getStateChanged() {
 	return stateChanged_;
 }
 
+bool Model::getNotifyState() {
+	return notifyStateChanged_;
+}
+
 void Model::activate(std::string args) {
 	LoggerPtr log(Logger::getLogger(getName()));
-	LOG4CXX_ERROR(log, getName() << " :: activate() method was called by Model instead of by Model subclass.");
+	LOG4CXX_ERROR(
+			log,
+			getName()
+					<< " :: activate() method was called by Model instead of by Model subclass.");
 }
 
 void Model::logOn() {
@@ -81,9 +98,13 @@ void Model::logOn() {
 		LoggerPtr log(Logger::getLogger(getName()));
 		if (scheduler_) {
 			// Write INFO message to log saying it is turned on and giving the time & temperature.
-			LOG4CXX_INFO(log, getName() << " :: ON at " << scheduler_->getFormattedTime());
+			LOG4CXX_INFO(log, getName() << " :: ON at "
+					<< scheduler_->getFormattedTime());
 		} else {
-			LOG4CXX_DEBUG(log, getName() << " :: logOn: " << getName() << " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
+			LOG4CXX_DEBUG(
+					log,
+					getName() << " :: logOn: " << getName()
+							<< " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
 		}
 	}
 	stateChanged_ = false;
@@ -93,11 +114,16 @@ void Model::logOff() {
 	if (stateChanged_ == true) {
 		LoggerPtr log(Logger::getLogger("WaterHeater"));
 		if (scheduler_) {
-			LOG4CXX_INFO(log, getName() << " :: OFF at " << scheduler_->getFormattedTime());
+			LOG4CXX_INFO(log, getName() << " :: OFF at "
+					<< scheduler_->getFormattedTime());
 		} else {
-			LOG4CXX_DEBUG(log, getName() << " :: logOff: " << getName() << " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
+			LOG4CXX_DEBUG(
+					log,
+					getName() << " :: logOff: " << getName()
+							<< " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
 		}
-		LOG4CXX_INFO(log, getName() << " :: Energy use: " << getEnergy() << " kWh");
+		LOG4CXX_INFO(log, getName() << " :: Energy use: " << getEnergy()
+				<< " kWh");
 	}
 	stateChanged_ = false;
 }
@@ -106,12 +132,16 @@ void Model::logPower() {
 	LoggerPtr log(Logger::getLogger(getName()));
 	if (scheduler_) {
 		if (stateChanged_ == true) {
-			LOG4CXX_INFO(log, getName() << " :: Instantaneous power use: " << getPower() << " kW");
-		}
-		else {
-			LOG4CXX_DEBUG(log, getName() << " :: Instantaneous power use: " << getPower() << " kW");
+			LOG4CXX_INFO(log, getName() << " :: Instantaneous power use: "
+					<< getPower() << " kW");
+		} else {
+			LOG4CXX_DEBUG(log, getName() << " :: Instantaneous power use: "
+					<< getPower() << " kW");
 		}
 	} else {
-		LOG4CXX_DEBUG(log, getName() << " :: logPower: " << getName() << " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
+		LOG4CXX_DEBUG(
+				log,
+				getName() << " :: logPower: " << getName()
+						<< " has not been associated with a Scheduler. (This message will also appear for test case instances of Models.)");
 	}
 }

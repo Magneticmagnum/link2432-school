@@ -6,3 +6,5 @@ name-Stove type-Stove powerOn-1.4 powerOff-0
 name-Television type-Television powerOn-0.18 powerOff-0.01
 name-Toaster type-Toaster powerOn-0.9 powerOff-0
 name-WaterHeater type-WaterHeater capacity-200 powerOn-3.0 powerOff-0
+name-JohnDoe type-PersonSM
+name-Clock type-Clock

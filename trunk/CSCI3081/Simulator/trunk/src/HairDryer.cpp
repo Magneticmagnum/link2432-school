@@ -29,6 +29,7 @@ void HairDryer::configure(PropertyTable* props) {
 }
 
 void HairDryer::tick() {
+	Model::tick();
 	logPower();
 	energy_ += getPower();
 	if (running_) {
@@ -56,10 +57,15 @@ bool HairDryer::isRunning() {
 	return running_;
 }
 
-void HairDryer::activate(bool high) {
+void HairDryer::activate(std::string args) {
 	running_ = true;
 	stateChanged_ = true;
-	high_ = high;
+	notifyStateChanged_ = true;
+	if ((args == "") || (args == "high") || (args == "hi")) {
+		high_ = true;
+	} else {
+		high_ = false;
+	}
 }
 
 void HairDryer::deactivate() {

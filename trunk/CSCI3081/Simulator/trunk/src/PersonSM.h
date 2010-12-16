@@ -34,7 +34,7 @@ typedef struct {
 
 typedef int (*statetemplate_f)(stateargs_t*);
 
-class PersonSM : public Model{
+class PersonSM: public Model {
 
 public:
 	PersonSM();
@@ -42,6 +42,9 @@ public:
 
 	/** loadStatefile(const char* path):
 	 * Loads states from a config file, parses config data, stores it in a state, and adds the state to the state map.
+	 * Uses config file class so file needs to be of the format:
+	 * name-<[A-Za-z]*> next-<[A-Za-z]*> type-<[statetypes]> parameters-<[[A-Za-z0-9]*|]*>
+	 * example: name-sleeping next-wake type-delay parameters-90
 	 */
 	int loadStateFile(const char* path);
 
@@ -49,6 +52,8 @@ public:
 	 * Tick the Person, performing whatever actions are necessary in their current state.
 	 */
 	void tick();
+
+	friend class PersonSMTest;
 
 private:
 	// Map to the stateargs_t entries in the config file
@@ -92,10 +97,41 @@ private:
 	 */
 	static int delay(stateargs_t*);
 
+	/** choice(stateargs_t*):
+	 * Determine if a random number condition is satisfied.
+	 * syntax: chance%|<success state>|<fail state>
+	 * Advances to success state if chance succeeds.  Otherwise advances to fail state
+	 */
 	static int choice(stateargs_t*);
-	// Pointer to current state argument map
-	stateargs_t *currentstate;
 
+	/** end(stateargs_t*):
+	 * Represents the end of the state machine. Does nothing - prevents segfault.
+	 */
+	static int end(stateargs_t*);
+
+	/** timedWait(stateargs_t*):
+	 * Wait until a time of day.
+	 */
+	static int timedWait(stateargs_t*);
+
+	/** dataChoice(stateargs_t *):
+	 * If model data (getData) == arg, choice 1.  Otherwise choice 2.
+	 * This is basically for checking dishwasher days since ran...
+	 * Syntax: Model|expectedValue|SuccessState|FailureState
+	 */
+	static int dataChoice(stateargs_t *);
+
+	/** earlierTimeChoice(stateargs_t *):
+	 *  Checks the clock. If the current time is less than the given time, advance to choice 1, otherwise choice 2.
+	 */
+	static int earlierTimeChoice(stateargs_t *);
+
+	/** laterTimeChoice(stateargs_t *):
+	 *  Checks the clock. If the current time is greater than the given time, advance to choice 1, otherwise choice 2.
+	 */
+	static int laterTimeChoice(stateargs_t *);
+	// Pointer to current state argument map
+	stateargs_t* currentstate;
 };
 
 #endif /* PERSONSM_H_ */

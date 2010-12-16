@@ -60,6 +60,8 @@ public:
 	 */
 	double getPower();
 
+	virtual int getData();
+
 	/** getEnergy:
 	 * Returns total energy usage of this Model since it was created.
 	 */
@@ -80,6 +82,8 @@ public:
 	 */
 	bool getStateChanged();
 
+	bool getNotifyState();
+
 	/** activate():
 	 * Activates the model based on arguments.
 	 */
@@ -93,6 +97,7 @@ protected:
 	double power_;
 	std::string name_;
 	bool stateChanged_;
+	bool notifyStateChanged_;
 
 	/** logOn:
 	 * Write INFO message to log saying Model is turned on and giving the time.

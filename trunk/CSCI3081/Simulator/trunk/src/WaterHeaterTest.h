@@ -160,6 +160,17 @@ public:
 		TS_ASSERT_EQUALS(wh.powerOff_, 0.001);
 	}
 
+	/** test_waterHeater_activate:
+	 * Tests that the WaterHeater activate method correctly draws water.
+	 */
+	void test_waterHeater_activate() {
+		WaterHeater wh;
+		wh.activate("on,100, 12");
+		double water = 100.0 * (12.0 - 7) / (50.0 - 7);
+		double temp = ((50.0 * (200.0 - water)) + (7 * water))/ 200.0;
+		TS_ASSERT_DELTA(wh.getTemperature(), temp, 1e-4);
+	}
+
 	/** test_waterHeater_shift:
 	 *  Tests that "<<" operator is overloaded to output current power & total energy use into the stream.
 	 */

@@ -31,6 +31,7 @@ void Oven::configure(PropertyTable* props) {
 }
 
 void Oven::tick() {
+	Model::tick();
 	logPower();
 	energy_ += getPower();
 	if (running_) {
@@ -38,12 +39,14 @@ void Oven::tick() {
 		if (ticks_ < (duration_ + 10)) {
 			if (ticks_ == 10) {
 				stateChanged_ = true;
+				notifyStateChanged_ = true;
 			}
 			ticks_++;
 		} else {
 			running_ = false;
 			ticks_ = 0;
 			stateChanged_ = true;
+			notifyStateChanged_ = true;
 			logOff();
 		}
 	} else {
@@ -73,8 +76,13 @@ bool Oven::isRunning() {
 	return running_;
 }
 
-void Oven::activate(int duration) {
+void Oven::activate(std::string args) {
 	running_ = true;
 	stateChanged_ = true;
-	duration_ = duration;
+	notifyStateChanged_ = true;
+	if (args == "") {
+		duration_ = 45;
+	} else {
+		duration_ = atoi(args.c_str());
+	}
 }

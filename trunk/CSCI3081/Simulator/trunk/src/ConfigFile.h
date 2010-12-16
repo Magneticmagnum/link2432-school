@@ -15,6 +15,8 @@
 using log4cxx::Logger;
 using log4cxx::LoggerPtr;
 
+// max length of parsed property lines (This is really long)
+#define MAX_LEN 1023
 typedef std::map<std::string, std::string> PropertyTable;
 
 class ConfigFile {
@@ -30,7 +32,7 @@ public:
 	/** getPropsMap:
 	 * Returns the map of PropertyTables for all Models.
 	 */
-	std::map<std::string, PropertyTable *> getPropsMap();
+	std::map<std::string, PropertyTable *> &getPropsMap();
 	std::map<std::string, PropertyTable *>::iterator begin();
 	std::map<std::string, PropertyTable *>::iterator end();
 

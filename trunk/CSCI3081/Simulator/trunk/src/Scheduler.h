@@ -20,12 +20,17 @@ public:
 	/** registerModel:
 	 * Adds Model instance thing to list of models that will be notified of ticks.
 	 */
-	bool registerModel(Model &thing);
+	bool registerModel(Model *thing);
 
 	/** getTime:
 	 * Returns number of ticks (Minutes) that have passed since Scheduler was started.
 	 */
 	int getTime();
+
+	/** getMinutesSinceMidnight:
+	 * Returns number of ticks (minutes) that have passed since midnight.
+	 */
+	int getMinutesSinceMidnight();
 
 	/** getMinute:
 	 * Returns number of Minutes in the Time that has passed since Scheduler was started.
@@ -58,11 +63,6 @@ public:
 	 */
 	std::vector<Model*> getModels();
 
-	/** incrementTime:
-	 * Increments current time by 1 minute.
-	 */
-	void incrementTime();
-
 	/** getSumPower:
 	 * Returns instantaneous power usage in kW, summed across all active Model instances.
 	 */
@@ -80,7 +80,6 @@ private:
 	std::vector<Model*> models_;
 	double sumPower_;
 	double sumEnergy_;
-
 };
 
 #endif /* SCHEDULER_H_ */

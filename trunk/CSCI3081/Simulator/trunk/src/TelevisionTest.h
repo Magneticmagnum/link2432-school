@@ -34,14 +34,14 @@ public:
 		tv.tick();
 		TS_ASSERT_EQUALS(tv.getPower(), 0.01);
 		// Check that turning TV on updates power usage & running state
-		tv.activate();
+		tv.activate("on");
 		tv.tick();
 		TS_ASSERT_EQUALS(tv.isRunning(), true);
 		TS_ASSERT_EQUALS(tv.getPower(), 0.18);
 		tv.tick();
 		TS_ASSERT_EQUALS(tv.getPower(), 0.18);
 		// Check that turning TV off updates power usage & running state
-		tv.deactivate();
+		tv.activate("off");
 		tv.tick();
 		TS_ASSERT_EQUALS(tv.isRunning(), false);
 		TS_ASSERT_EQUALS(tv.getPower(), 0.01);
@@ -53,9 +53,9 @@ public:
 	void test_television_getEnergy() {
 		Television tv;
 		tv.tick();
-		tv.activate();
+		tv.activate("on");
 		tv.tick();
-		tv.deactivate();
+		tv.activate("off");
 		tv.tick();
 		TS_ASSERT_DELTA(tv.getEnergy(), (0.01*2 + 0.18)/60, 1e-6);
 	}
