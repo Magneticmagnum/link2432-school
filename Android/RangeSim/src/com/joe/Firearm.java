@@ -4,24 +4,32 @@ import min3d.core.Object3dContainer;
 import min3d.vos.Number3d;
 
 public class Firearm {
-	public final static Number3d IRONS_HANDGUN = new Number3d(0f, -0.3f, -1.75f);
-	public final static Number3d HIP_HANDGUN = new Number3d(0.75f, -0.75f,
-			-2.5f);
+	public final static int LOOK_FREE = 1;
+	public final static int LOOK_AIM = 2;
+	public final static int LOOK_AIM_TO_FREE = 3;
+	public final static int LOOK_FREE_TO_AIM = 4;
 	private static final float RAD_TO_DEG = (float) (180 / Math.PI);
+	private static final int AIM_FRAME = 6;
 	// offset of iron sight
-	public Number3d irons;
-	// offset of hip
-	public Number3d hip;
-	public float scale;
-	public Number3d lookAt;
-	public Object3dContainer object;
-	public boolean rotatedY;
+	private final Number3d ironOffset;
+	// offset of hip/freelook
+	private final Number3d freeOffset;
+	private float scale;
+	private LinearMover gunPos;
+	private LinearMover crossHairs;
+	private final Number3d CROSSHAIR_POSITION;
+	private Object3dContainer object;
+	private boolean rotatedY;
+	private int lookMode;
 
-	public Firearm() {
-	}
-
-	public Number3d getLookAt() {
-		return lookAt;
+	public Firearm(Number3d pos, Number3d target, Number3d ironOffset,
+			Number3d freeOffset) {
+		// wrap the number3d class in a looktarget to be used by linearmover
+		CROSSHAIR_POSITION = target.clone();
+		this.ironOffset = ironOffset;
+		this.freeOffset = freeOffset;
+		crossHairs = new LinearMover(new LookTarget(target));
+		gunPos = new LinearMover(new LookTarget(pos));
 	}
 
 	public void scale(float f) {
@@ -29,17 +37,29 @@ public class Firearm {
 		object.scale().x = object.scale().y = object.scale().z = f;
 	}
 
+	public void setIrons(boolean irons) {
+		if (irons) {
+			if (lookMode == LOOK_FREE || lookMode == LOOK_AIM_TO_FREE)
+				lookMode = LOOK_FREE_TO_AIM;
+			gunPos.moveTo(this.ironOffset, AIM_FRAME);
+		} else {
+			if (lookMode == LOOK_AIM || lookMode == LOOK_FREE_TO_AIM)
+				lookMode = LOOK_AIM_TO_FREE;
+			gunPos.moveTo(this.freeOffset, AIM_FRAME);
+		}
+	}
+
 	public void pointAt(boolean isIron) {
 		if (isIron)
-			pointOffset(new Vector3(irons.x, irons.y, irons.z));
+			pointOffset(new Vector3(ironOffset.x, ironOffset.y, ironOffset.z));
 		else
-			pointOffset(new Vector3(hip.x, hip.y, hip.z));
+			pointOffset(new Vector3(freeOffset.x, freeOffset.y, freeOffset.z));
 	}
 
 	public void pointOffset(Vector3 offset) {
-		Number3d toBack = object.position().clone();
+		Number3d toBack = gunPos.getMover().getNumber().clone();
 		toBack.z = -1;
-		Number3d dir = lookAt.clone();
+		Number3d dir = crossHairs.getMover().getNumber().clone();
 		dir.subtract(object.position());
 		Quaternion bet = com.joe.Utils.quaternionBetween(dir, toBack);
 		Number3d euls = com.joe.Utils.rot2Euler(bet);
@@ -52,19 +72,71 @@ public class Firearm {
 		object.position().add(offset);
 	}
 
-	// smooth cubic interpolation
-	// 0 is hip, 1 is irons
-	public void pointTransition(float i) {
-		float x = Utils.splineTransition(hip.x, 0, irons.x, 0, i);
-		float y = Utils.splineTransition(hip.y, 0, irons.y, 0, i);
-		float z = Utils.splineTransition(hip.z, 0, irons.z, 0, i);
-
-		Vector3 trans = new Vector3(x, y, z);
-		pointOffset(trans);
+	public void setPosition(Number3d n) {
+		gunPos.set(n);
 	}
 
-	public void setPosition(Number3d n) {
-		object.position().setAllFrom(n);
+	// moves the crosshair to default position linearly
+	public void resetCrosshair() {
+		crossHairs.moveTo(CROSSHAIR_POSITION, AIM_FRAME);
+	}
+
+	// instantly sets crosshair (no movement)
+	public void setCrosshair(Number3d n) {
+		crossHairs.set(n);
+	}
+
+	public void setLookMode(int lookMode) {
+		this.lookMode = lookMode;
+	}
+
+	public void setRotatedY(boolean rotatedY) {
+		this.rotatedY = rotatedY;
+	}
+
+	public void setObject(Object3dContainer object) {
+		this.object = object;
+	}
+
+	// update look mode
+	// also update weapon to point at crosshair
+	public void update() {
+		if (lookMode == LOOK_FREE_TO_AIM) {
+			if (gunPos.isDone())
+				lookMode = LOOK_AIM;
+		} else if (lookMode == LOOK_AIM_TO_FREE) {
+			if (gunPos.isDone())
+				lookMode = LOOK_FREE;
+		}
+
+	}
+
+	public LinearMover getCrossHairs() {
+		return crossHairs;
+	}
+
+	public Number3d getFreeOffset() {
+		return freeOffset;
+	}
+
+	public LinearMover getGunPos() {
+		return gunPos;
+	}
+
+	public Number3d getIronOffset() {
+		return ironOffset;
+	}
+
+	public int getLookMode() {
+		return lookMode;
+	}
+
+	public Object3dContainer getObject() {
+		return object;
+	}
+
+	public float getScale() {
+		return scale;
 	}
 
 }
