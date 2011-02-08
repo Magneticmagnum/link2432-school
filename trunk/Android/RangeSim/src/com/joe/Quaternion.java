@@ -135,7 +135,7 @@ public class Quaternion {
 	public static void invert(Quaternion a) {
 		// TODO Auto-generated method stub
 		conjugate(a);
-		scale(a, 1.0f / a.length_squared(a));
+		scale(a, 1.0f / Quaternion.length_squared(a));
 	}
 
 	public void conjugate() {
