@@ -3,8 +3,6 @@ package com.joe;
 import java.util.Hashtable;
 import java.util.Map;
 
-import min3d.Shared;
-import min3d.Utils;
 import min3d.core.Object3dContainer;
 import min3d.core.RendererActivity;
 import min3d.objectPrimitives.Box;
@@ -22,7 +20,7 @@ import android.view.MotionEvent;
 
 public class RangeSim extends RendererActivity {
 	private Map<String, Object3dContainer> models;
-	private Map<String, Firearm> guns;
+	private Map<String, Firearm3d> guns;
 	private String currentGun = "GLOCK19";
 	private Map<String, LinearMover> moveSolvers;
 	private LinearMover cameraMover;
@@ -34,7 +32,7 @@ public class RangeSim extends RendererActivity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		models = new Hashtable<String, Object3dContainer>();
-		guns = new Hashtable<String, Firearm>();
+		guns = new Hashtable<String, Firearm3d>();
 		moveSolvers = new Hashtable<String, LinearMover>();
 		orientationManager = new OrientationManager(
 				(SensorManager) getSystemService(SENSOR_SERVICE), 1);
@@ -45,11 +43,11 @@ public class RangeSim extends RendererActivity {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub
-		Firearm g = getGun();
+		Firearm3d g = getGun();
 		if (event.getAction() == MotionEvent.ACTION_DOWN
 				|| event.getAction() == MotionEvent.ACTION_MOVE) {
-			if (g.getLookMode() == Firearm.LOOK_FREE
-					|| g.getLookMode() == Firearm.LOOK_AIM_TO_FREE)
+			if (g.getLookMode() == Firearm3d.LOOK_FREE
+					|| g.getLookMode() == Firearm3d.LOOK_AIM_TO_FREE)
 				g.setIrons(true);
 			else
 				g.setIrons(false);
@@ -86,8 +84,9 @@ public class RangeSim extends RendererActivity {
 		laser.normalsEnabled(true);
 		laser.colorMaterialEnabled(true);
 
-		Bitmap targTex = Utils.makeBitmapFromResourceId(this, R.raw.target);
-		Shared.textureManager().addTextureId(targTex, "target");
+		Bitmap targTex = min3d.Utils.makeBitmapFromResourceId(this,
+				R.raw.target);
+		min3d.Shared.textureManager().addTextureId(targTex, "target");
 		target.textures().addById("target");
 		targTex.recycle();
 
@@ -111,7 +110,7 @@ public class RangeSim extends RendererActivity {
 
 		models.put("range", range);
 
-		Firearm gun = FirearmFactory.makePistol(g);
+		Firearm3d gun = FirearmFactory.makePistol(g);
 		moveSolvers.put("crosshair", gun.getCrossHairs());
 		moveSolvers.put("gun", gun.getGunPos());
 		moveSolvers.put("cameraTarget", cameraTarget);
@@ -130,10 +129,10 @@ public class RangeSim extends RendererActivity {
 		// update linear movers
 		for (LinearMover e : moveSolvers.values())
 			e.update();
-		Firearm gun = getGun();
+		Firearm3d gun = getGun();
 		gun.update();
 
-		if (gun.getLookMode() == Firearm.LOOK_AIM) {
+		if (gun.getLookMode() == Firearm3d.LOOK_AIM) {
 			// aim logic here
 			float x = (float) (getVelocity()[0] * aimscale * 0.5);
 			float y = (float) (getVelocity()[1] * aimscale * 0.5);
@@ -145,7 +144,7 @@ public class RangeSim extends RendererActivity {
 			Vector3 irons = new Vector3(gun.getIronOffset().x,
 					gun.getIronOffset().y, gun.getIronOffset().z);
 			gun.pointOffset(irons);
-		} else if (gun.getLookMode() == Firearm.LOOK_FREE) {
+		} else if (gun.getLookMode() == Firearm3d.LOOK_FREE) {
 			// free look logic here
 			float x = getVelocity()[0] * freescale;
 			float y = getVelocity()[1] * freescale;
@@ -185,7 +184,7 @@ public class RangeSim extends RendererActivity {
 		return orientationManager.getVelocity();
 	}
 
-	public Firearm getGun() {
+	public Firearm3d getGun() {
 		return guns.get(currentGun);
 	}
 }
