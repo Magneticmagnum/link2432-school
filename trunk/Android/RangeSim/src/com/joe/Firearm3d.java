@@ -3,7 +3,7 @@ package com.joe;
 import min3d.core.Object3dContainer;
 import min3d.vos.Number3d;
 
-public class Firearm {
+public class Firearm3d {
 	public final static int LOOK_FREE = 1;
 	public final static int LOOK_AIM = 2;
 	public final static int LOOK_AIM_TO_FREE = 3;
@@ -21,10 +21,12 @@ public class Firearm {
 	private Object3dContainer object;
 	private boolean rotatedY;
 	private int lookMode;
+	private final FirearmActor firearmActor;
 
-	public Firearm(Number3d pos, Number3d target, Number3d ironOffset,
-			Number3d freeOffset) {
+	public Firearm3d(FirearmActor firearmActor, Number3d pos, Number3d target,
+			Number3d ironOffset, Number3d freeOffset) {
 		// wrap the number3d class in a looktarget to be used by linearmover
+		this.firearmActor = firearmActor;
 		CROSSHAIR_POSITION = target.clone();
 		this.ironOffset = ironOffset;
 		this.freeOffset = freeOffset;
@@ -46,6 +48,8 @@ public class Firearm {
 			if (lookMode == LOOK_AIM || lookMode == LOOK_FREE_TO_AIM)
 				lookMode = LOOK_AIM_TO_FREE;
 			gunPos.moveTo(this.freeOffset, AIM_FRAME);
+			// move crosshair back to start
+			resetCrosshair();
 		}
 	}
 
@@ -113,6 +117,10 @@ public class Firearm {
 
 	public LinearMover getCrossHairs() {
 		return crossHairs;
+	}
+
+	public FirearmActor getFirearmActor() {
+		return firearmActor;
 	}
 
 	public Number3d getFreeOffset() {
