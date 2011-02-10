@@ -1,5 +1,8 @@
 package com.joe;
 
+import java.util.Random;
+
+import android.util.Log;
 import min3d.core.Object3dContainer;
 import min3d.vos.Number3d;
 
@@ -9,7 +12,7 @@ public class Firearm3d {
 	public final static int LOOK_AIM_TO_FREE = 3;
 	public final static int LOOK_FREE_TO_AIM = 4;
 	private static final float RAD_TO_DEG = (float) (180 / Math.PI);
-	private static final int AIM_FRAME = 6;
+	public static final int AIM_FRAME = 6;
 	// offset of iron sight
 	private final Number3d ironOffset;
 	// offset of hip/freelook
@@ -18,20 +21,26 @@ public class Firearm3d {
 	private LinearMover gunPos;
 	private LinearMover crossHairs;
 	private final Number3d CROSSHAIR_POSITION;
+	private final Number3d DEFAULT_POSITION;
 	private Object3dContainer object;
 	private boolean rotatedY;
 	private int lookMode;
 	private final FirearmActor firearmActor;
 
-	public Firearm3d(FirearmActor firearmActor, Number3d pos, Number3d target,
-			Number3d ironOffset, Number3d freeOffset) {
+	public Firearm3d(Object3dContainer object, FirearmActor firearmActor,
+			Number3d pos, Number3d target, Number3d ironOffset,
+			Number3d freeOffset) {
 		// wrap the number3d class in a looktarget to be used by linearmover
+		this.object = object;
+
 		this.firearmActor = firearmActor;
-		CROSSHAIR_POSITION = target.clone();
+		CROSSHAIR_POSITION = target;
+		DEFAULT_POSITION = pos;
 		this.ironOffset = ironOffset;
 		this.freeOffset = freeOffset;
-		crossHairs = new LinearMover(new LookTarget(target));
-		gunPos = new LinearMover(new LookTarget(pos));
+		crossHairs = new LinearMover(new LookTarget(target.clone()));
+		gunPos = new LinearMover(new LookTarget(object.position()));
+		lookMode = LOOK_FREE;
 	}
 
 	public void scale(float f) {
@@ -49,7 +58,7 @@ public class Firearm3d {
 				lookMode = LOOK_AIM_TO_FREE;
 			gunPos.moveTo(this.freeOffset, AIM_FRAME);
 			// move crosshair back to start
-			resetCrosshair();
+			crossHairs.moveTo(CROSSHAIR_POSITION, AIM_FRAME);
 		}
 	}
 
@@ -68,12 +77,12 @@ public class Firearm3d {
 		Quaternion bet = com.joe.Utils.quaternionBetween(dir, toBack);
 		Number3d euls = com.joe.Utils.rot2Euler(bet);
 		euls.multiply(RAD_TO_DEG);
-		offset.rotate(bet);
 
+		offset.rotate(bet);
 		object.rotation().setAllFrom(euls);
 		if (rotatedY)
 			object.rotation().y += 180;
-		object.position().add(offset);
+		gunPos.getMover().getNumber().add(offset);
 	}
 
 	public void setPosition(Number3d n) {
@@ -146,5 +155,4 @@ public class Firearm3d {
 	public float getScale() {
 		return scale;
 	}
-
 }

@@ -1,7 +1,11 @@
 package com.joe;
 
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import min3d.core.Object3dContainer;
 import min3d.core.RendererActivity;
@@ -12,10 +16,14 @@ import min3d.parser.Parser;
 import min3d.vos.Color4;
 import min3d.vos.Light;
 import min3d.vos.LightType;
+import min3d.vos.Number3d;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public class RangeSim extends RendererActivity {
@@ -25,6 +33,7 @@ public class RangeSim extends RendererActivity {
 	private Map<String, LinearMover> moveSolvers;
 	private LinearMover cameraMover;
 	private LinearMover cameraTarget;
+	private final Number3d CAMERA_TARGET = new Number3d(0, 0, -10);
 	private static OrientationManager orientationManager;
 
 	@Override
@@ -40,17 +49,35 @@ public class RangeSim extends RendererActivity {
 
 	}
 
+	public void singleTouch(float x, float y, int action) {
+		Firearm3d g = getGun();
+		if (action == MotionEvent.ACTION_DOWN
+				|| action == MotionEvent.ACTION_MOVE) {
+			if (g.getLookMode() == Firearm3d.LOOK_FREE
+					|| g.getLookMode() == Firearm3d.LOOK_AIM_TO_FREE) {
+				g.getCrossHairs().moveTo(cameraTarget.getMover().getNumber(),
+						Firearm3d.AIM_FRAME);
+				g.setIrons(true);
+			}
+
+		} else {
+			if (g.getLookMode() == Firearm3d.LOOK_AIM
+					|| g.getLookMode() == Firearm3d.LOOK_FREE_TO_AIM) {
+				g.setIrons(false);
+				cameraTarget.moveTo(CAMERA_TARGET, Firearm3d.AIM_FRAME);
+			}
+		}
+	}
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub
 		Firearm3d g = getGun();
-		if (event.getAction() == MotionEvent.ACTION_DOWN
-				|| event.getAction() == MotionEvent.ACTION_MOVE) {
-			if (g.getLookMode() == Firearm3d.LOOK_FREE
-					|| g.getLookMode() == Firearm3d.LOOK_AIM_TO_FREE)
-				g.setIrons(true);
-			else
-				g.setIrons(false);
+		int action = event.getAction();
+		if (event.getPointerCount() > 1) {
+			// multitouch
+		} else {
+			singleTouch(event.getX(), event.getY(), action);
 		}
 		return super.onTouchEvent(event);
 	}
@@ -104,7 +131,7 @@ public class RangeSim extends RendererActivity {
 		scene.addChild(range);
 		scene.addChild(target);
 
-		scene.camera().target.z = -10;
+		scene.camera().target.setAllFrom(CAMERA_TARGET);
 		cameraTarget = new LinearMover(new LookTarget(scene.camera().target));
 		cameraMover = new LinearMover(new LookTarget(scene.camera().position));
 
@@ -116,6 +143,8 @@ public class RangeSim extends RendererActivity {
 		moveSolvers.put("cameraTarget", cameraTarget);
 		moveSolvers.put("cameraPos", cameraMover);
 
+		cameraMover.moveTo(new Number3d(0, 0, 2), 12);
+
 		guns.put("GLOCK19", gun);
 
 		gun.setIrons(false);
@@ -123,39 +152,50 @@ public class RangeSim extends RendererActivity {
 
 	@Override
 	public void updateScene() {
-		final float aimscale = 0.0075f;
-		final float freescale = 0.04f;
+		final float aimscale = 0.025f;
+		final float freescale = 0.08f;
 
 		// update linear movers
-		for (LinearMover e : moveSolvers.values())
-			e.update();
+		for (LinearMover m : moveSolvers.values())
+			m.update();
 		Firearm3d gun = getGun();
 		gun.update();
 
 		if (gun.getLookMode() == Firearm3d.LOOK_AIM) {
 			// aim logic here
-			float x = (float) (getVelocity()[0] * aimscale * 0.5);
-			float y = (float) (getVelocity()[1] * aimscale * 0.5);
-			cameraMover.add(-x, -y, 0);
-			cameraTarget.add(x * .25f, y * .25f, 0);
+			float x = (float) (getVelocity()[0] * aimscale);
+			float y = (float) (getVelocity()[1] * aimscale);
+			cameraTarget.add(x, y, 0);
 			gun.getCrossHairs().set(cameraTarget.getMover().getNumber());
-
-			gun.setPosition(cameraMover.getMover().getNumber());
-			Vector3 irons = new Vector3(gun.getIronOffset().x,
-					gun.getIronOffset().y, gun.getIronOffset().z);
+			Vector3 irons = new Vector3(gun.getIronOffset().x, gun
+					.getIronOffset().y, gun.getIronOffset().z);
+			gun.getGunPos().getMover().getNumber().setAllFrom(
+					cameraMover.getMover().getNumber());
 			gun.pointOffset(irons);
+
 		} else if (gun.getLookMode() == Firearm3d.LOOK_FREE) {
 			// free look logic here
 			float x = getVelocity()[0] * freescale;
 			float y = getVelocity()[1] * freescale;
 
-			gun.getCrossHairs().add(-x * 2, -y * 2, 0);
+			gun.getCrossHairs().add(x * 2, y * 2, 0);
+			cameraTarget.add(x, y, 0);
 
-			gun.setPosition(cameraMover.getMover().getNumber());
-			Vector3 irons = new Vector3(gun.getIronOffset().x,
-					gun.getIronOffset().y, gun.getIronOffset().z);
-			gun.pointOffset(irons);
+			gun.getGunPos().set(cameraMover.getMover().getNumber());
+			Vector3 free = new Vector3(gun.getFreeOffset().x, gun
+					.getFreeOffset().y, gun.getFreeOffset().z);
+			gun.pointOffset(free);
 		}
+	}
+
+	public void viewKick() {
+		Random r = new Random();
+		Number3d old = cameraTarget.getMover().getNumber();
+		old.x += r.nextFloat() - 0.5;
+		old.y += r.nextFloat() - 0.5;
+		cameraTarget.getMover().getNumber().setAll(r.nextFloat() * 2,
+				r.nextFloat() * 2 + 1, 0);
+		cameraTarget.moveTo(old, 12);
 	}
 
 	protected void onResume() {

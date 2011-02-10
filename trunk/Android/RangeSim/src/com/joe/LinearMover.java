@@ -1,5 +1,6 @@
 package com.joe;
 
+import android.util.Log;
 import min3d.vos.Number3d;
 
 public class LinearMover {
@@ -13,6 +14,8 @@ public class LinearMover {
 
 	public LinearMover(IMoveable target) {
 		this.target = target;
+		frames = 0;
+		done = true;
 	}
 
 	public IMoveable getMover() {
@@ -77,6 +80,7 @@ public class LinearMover {
 		t.x += n.x;
 		t.y += n.y;
 		t.z += n.z;
+		done = true;
 	}
 
 	/**
@@ -91,6 +95,13 @@ public class LinearMover {
 		t.x += x;
 		t.y += y;
 		t.z += z;
+		done = true;
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "Mover " + getMover().getNumber().toString();
 	}
 
 }
