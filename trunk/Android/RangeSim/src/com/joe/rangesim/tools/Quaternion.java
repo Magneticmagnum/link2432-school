@@ -1,4 +1,4 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
 import android.util.FloatMath;
 

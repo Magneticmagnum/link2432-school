@@ -1,6 +1,5 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
-import android.util.Log;
 import min3d.vos.Number3d;
 
 public class LinearMover {
@@ -95,6 +94,14 @@ public class LinearMover {
 		t.x += x;
 		t.y += y;
 		t.z += z;
+		done = true;
+	}
+
+	public void set(float x, float y, float z) {
+		Number3d t = target.getNumber();
+		t.x = x;
+		t.y = y;
+		t.z = z;
 		done = true;
 	}
 

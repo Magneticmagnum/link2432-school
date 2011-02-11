@@ -1,5 +1,6 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
+import min3d.vos.Number3d;
 import android.util.FloatMath;
 
 public class Vector3 {
@@ -93,6 +94,14 @@ public class Vector3 {
 		a.y = resQuat.y;
 		a.z = resQuat.z;
 		a.scale(mag);
+	}
+
+	public Number3d asNum() {
+		return asNum(this);
+	}
+
+	public static Number3d asNum(Vector3 a) {
+		return new Number3d(a.x, a.y, a.z);
 	}
 
 	@Override

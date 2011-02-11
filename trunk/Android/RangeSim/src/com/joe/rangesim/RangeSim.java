@@ -1,11 +1,8 @@
-package com.joe;
+package com.joe.rangesim;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import min3d.core.Object3dContainer;
 import min3d.core.RendererActivity;
@@ -17,20 +14,22 @@ import min3d.vos.Color4;
 import min3d.vos.Light;
 import min3d.vos.LightType;
 import min3d.vos.Number3d;
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Vibrator;
-import android.util.Log;
 import android.view.MotionEvent;
+
+import com.joe.R;
+import com.joe.rangesim.sensor.OrientationManager;
+import com.joe.rangesim.tools.LinearMover;
+import com.joe.rangesim.tools.LookTarget;
+import com.joe.rangesim.tools.Vector3;
 
 public class RangeSim extends RendererActivity {
 	private Map<String, Object3dContainer> models;
 	private Map<String, Firearm3d> guns;
-	private String currentGun = "GLOCK19";
 	private Map<String, LinearMover> moveSolvers;
+	private String currentGun = "Glock 19";
 	private LinearMover cameraMover;
 	private LinearMover cameraTarget;
 	private final Number3d CAMERA_TARGET = new Number3d(0, 0, -10);
@@ -72,7 +71,6 @@ public class RangeSim extends RendererActivity {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// TODO Auto-generated method stub
-		Firearm3d g = getGun();
 		int action = event.getAction();
 		if (event.getPointerCount() > 1) {
 			// multitouch
@@ -82,14 +80,9 @@ public class RangeSim extends RendererActivity {
 		return super.onTouchEvent(event);
 	}
 
-	public static Object3dContainer loadModel(Resources r, String p) {
-		IParser parser = Parser.createParser(Parser.Type.OBJ, r, p, true);
-		parser.parse();
-		return parser.getParsedObject();
-	}
-
 	@Override
 	public void initScene() {
+
 		Light light = new Light();
 		scene.lights().add(light);
 		light.position.setAll(3f, 5f, -1f);
@@ -99,17 +92,12 @@ public class RangeSim extends RendererActivity {
 		light.isVisible(true);
 
 		// model loading
-		Object3dContainer g = loadModel(getResources(),
-				"com.joe:raw/glock19_obj");
-		Object3dContainer range = loadModel(getResources(),
-				"com.joe:raw/range_obj");
-		g.texturesEnabled(true);
+		IParser parser = Parser.createParser(Parser.Type.OBJ, getResources(),
+				"com.joe:raw/range_obj", true);
+		parser.parse();
+		Object3dContainer range = parser.getParsedObject();
 		Rectangle target = new Rectangle(1, 1, 4, 4);
-		Box laser = new Box(0.2f, 0.2f, 400);
-		laser.defaultColor(new Color4(255, 0, 0, 0));
 		target.normalsEnabled(true);
-		laser.normalsEnabled(true);
-		laser.colorMaterialEnabled(true);
 
 		Bitmap targTex = min3d.Utils.makeBitmapFromResourceId(this,
 				R.raw.target);
@@ -117,19 +105,11 @@ public class RangeSim extends RendererActivity {
 		target.textures().addById("target");
 		targTex.recycle();
 
-		laser.position().setAllFrom(g.position());
-		laser.position().z += 200;
-		laser.position().y -= 10;
 		range.scale().x = range.scale().y = range.scale().z = 1f;
 		range.position().setAll(0, 0, -30);
 		range.rotation().y = 180;
 		target.position().setAll(0, 0, -10);
 		target.rotation().y = 180;
-
-		g.addChild(laser);
-		scene.addChild(g);
-		scene.addChild(range);
-		scene.addChild(target);
 
 		scene.camera().target.setAllFrom(CAMERA_TARGET);
 		cameraTarget = new LinearMover(new LookTarget(scene.camera().target));
@@ -137,7 +117,13 @@ public class RangeSim extends RendererActivity {
 
 		models.put("range", range);
 
-		Firearm3d gun = FirearmFactory.makePistol(g);
+		FirearmFactory fMaker = new FirearmFactory(this);
+		Firearm3d gun = fMaker.makeGlock();
+
+		scene.addChild(gun.getObject());
+		scene.addChild(range);
+		scene.addChild(target);
+
 		moveSolvers.put("crosshair", gun.getCrossHairs());
 		moveSolvers.put("gun", gun.getGunPos());
 		moveSolvers.put("cameraTarget", cameraTarget);
@@ -145,7 +131,7 @@ public class RangeSim extends RendererActivity {
 
 		cameraMover.moveTo(new Number3d(0, 0, 2), 12);
 
-		guns.put("GLOCK19", gun);
+		guns.put(gun.getFirearmActor().getFirearmModel().getName(), gun);
 
 		gun.setIrons(false);
 	}
@@ -167,10 +153,10 @@ public class RangeSim extends RendererActivity {
 			float y = (float) (getVelocity()[1] * aimscale);
 			cameraTarget.add(x, y, 0);
 			gun.getCrossHairs().set(cameraTarget.getMover().getNumber());
-			Vector3 irons = new Vector3(gun.getIronOffset().x, gun
-					.getIronOffset().y, gun.getIronOffset().z);
-			gun.getGunPos().getMover().getNumber().setAllFrom(
-					cameraMover.getMover().getNumber());
+			Vector3 irons = new Vector3(gun.getIronOffset().x,
+					gun.getIronOffset().y, gun.getIronOffset().z);
+			gun.getGunPos().getMover().getNumber()
+					.setAllFrom(cameraMover.getMover().getNumber());
 			gun.pointOffset(irons);
 
 		} else if (gun.getLookMode() == Firearm3d.LOOK_FREE) {
@@ -182,8 +168,8 @@ public class RangeSim extends RendererActivity {
 			cameraTarget.add(x, y, 0);
 
 			gun.getGunPos().set(cameraMover.getMover().getNumber());
-			Vector3 free = new Vector3(gun.getFreeOffset().x, gun
-					.getFreeOffset().y, gun.getFreeOffset().z);
+			Vector3 free = new Vector3(gun.getFreeOffset().x,
+					gun.getFreeOffset().y, gun.getFreeOffset().z);
 			gun.pointOffset(free);
 		}
 	}
@@ -193,8 +179,8 @@ public class RangeSim extends RendererActivity {
 		Number3d old = cameraTarget.getMover().getNumber();
 		old.x += r.nextFloat() - 0.5;
 		old.y += r.nextFloat() - 0.5;
-		cameraTarget.getMover().getNumber().setAll(r.nextFloat() * 2,
-				r.nextFloat() * 2 + 1, 0);
+		cameraTarget.getMover().getNumber()
+				.setAll(r.nextFloat() * 2, r.nextFloat() * 2 + 1, 0);
 		cameraTarget.moveTo(old, 12);
 	}
 

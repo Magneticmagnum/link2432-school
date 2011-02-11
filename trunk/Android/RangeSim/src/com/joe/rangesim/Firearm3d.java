@@ -1,10 +1,14 @@
-package com.joe;
+package com.joe.rangesim;
 
-import java.util.Random;
-
-import android.util.Log;
 import min3d.core.Object3dContainer;
 import min3d.vos.Number3d;
+
+import com.joe.rangesim.models.FirearmActor;
+import com.joe.rangesim.tools.LinearMover;
+import com.joe.rangesim.tools.LookTarget;
+import com.joe.rangesim.tools.Quaternion;
+import com.joe.rangesim.tools.Utils;
+import com.joe.rangesim.tools.Vector3;
 
 public class Firearm3d {
 	public final static int LOOK_FREE = 1;
@@ -21,7 +25,6 @@ public class Firearm3d {
 	private LinearMover gunPos;
 	private LinearMover crossHairs;
 	private final Number3d CROSSHAIR_POSITION;
-	private final Number3d DEFAULT_POSITION;
 	private Object3dContainer object;
 	private boolean rotatedY;
 	private int lookMode;
@@ -35,7 +38,6 @@ public class Firearm3d {
 
 		this.firearmActor = firearmActor;
 		CROSSHAIR_POSITION = target;
-		DEFAULT_POSITION = pos;
 		this.ironOffset = ironOffset;
 		this.freeOffset = freeOffset;
 		crossHairs = new LinearMover(new LookTarget(target.clone()));
@@ -74,15 +76,15 @@ public class Firearm3d {
 		toBack.z = -1;
 		Number3d dir = crossHairs.getMover().getNumber().clone();
 		dir.subtract(object.position());
-		Quaternion bet = com.joe.Utils.quaternionBetween(dir, toBack);
-		Number3d euls = com.joe.Utils.rot2Euler(bet);
+		Quaternion bet = Utils.quaternionBetween(dir, toBack);
+		Number3d euls = Utils.rot2Euler(bet);
 		euls.multiply(RAD_TO_DEG);
 
 		offset.rotate(bet);
 		object.rotation().setAllFrom(euls);
 		if (rotatedY)
 			object.rotation().y += 180;
-		gunPos.getMover().getNumber().add(offset);
+		gunPos.set(offset.x, offset.y, offset.z);
 	}
 
 	public void setPosition(Number3d n) {
