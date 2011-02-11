@@ -1,4 +1,4 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
 import min3d.vos.Number3d;
 

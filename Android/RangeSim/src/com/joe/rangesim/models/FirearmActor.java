@@ -1,4 +1,4 @@
-package com.joe;
+package com.joe.rangesim.models;
 
 /*
  * handles all logic of a firearm

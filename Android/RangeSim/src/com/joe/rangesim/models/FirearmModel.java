@@ -1,4 +1,4 @@
-package com.joe;
+package com.joe.rangesim.models;
 
 /*
  * Model class containing all firearm properties
@@ -13,12 +13,12 @@ public class FirearmModel {
 	public final static int STYLE_RIFLE = 2;
 	private final int firearmStyle;
 	private final int rateOfFire;
-	private final Cartridge chamber;
+	private final CartridgeModel chamber;
 	private final String name;
 	private boolean selectiveFire;
 	private int fireMode;
 
-	public FirearmModel(String name, Cartridge c, int rof, int style) {
+	public FirearmModel(String name, CartridgeModel c, int rof, int style) {
 		// TODO Auto-generated constructor stub
 		this.name = name;
 		this.chamber = c;
@@ -27,7 +27,7 @@ public class FirearmModel {
 		this.fireMode = MODE_SEMI;
 	}
 
-	public Cartridge getChamber() {
+	public CartridgeModel getChamber() {
 		return chamber;
 	}
 

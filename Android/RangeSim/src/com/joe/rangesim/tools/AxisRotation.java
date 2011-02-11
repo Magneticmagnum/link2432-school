@@ -1,4 +1,4 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
 public class AxisRotation {
 

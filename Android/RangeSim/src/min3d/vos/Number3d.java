@@ -1,6 +1,6 @@
 package min3d.vos;
 
-import com.joe.Vector3;
+import com.joe.rangesim.tools.Vector3;
 
 /**
  * Simple VO holding x,y, and z values. Plus helper math functions. Care should

@@ -1,7 +1,7 @@
-package com.joe;
+package com.joe.rangesim.tools;
 
-import android.util.FloatMath;
 import min3d.vos.Number3d;
+import android.util.FloatMath;
 
 public class Utils {
 	public static AxisRotation angleBetween(Number3d v1, Number3d v2) {
@@ -123,7 +123,7 @@ public class Utils {
 		Vector3.cp(right, back);
 		Vector3 up = new Vector3(back);
 		Vector3.cp(up, right);
-		Quaternion finalrot = com.joe.Utils.axis2Rot(back, right, up);
+		Quaternion finalrot = Utils.axis2Rot(back, right, up);
 		return finalrot;
 	}
 
